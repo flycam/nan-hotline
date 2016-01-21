@@ -1,0 +1,5 @@
+telegram_token="blahbla"
+allowedNumbers={123456: "sip:**1@fritz.fonwlan.box"}
+sip_registrar="127.0.0.1"
+sip_account="620"
+sip_pw="passwort"
