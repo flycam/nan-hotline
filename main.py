@@ -34,17 +34,17 @@ class MyAccountCallback(pj.AccountCallback):
         call.answer(200, "allet supa")
 
 
-def make_call(uri, acc, to_disconnect_id, door_call):
+def make_call(callcallback, uri, acc, to_disconnect_id, door_call):
     try:
         thread_desc = 0;
-        err = _pjsua.thread_register("python call worker"+uri, thread_desc)
+        err = _pjsua.thread_register("python call worker" + uri, thread_desc)
         global lib
         # make a call
         print "Making call to", uri
         call = acc.make_call(uri)
         call_cb = DoorConnectorCallCallback(call, to_disconnect_id, door_call)
         call.set_callback(call_cb)
-        return call
+        callcallback.makecallCall = call
     except pj.Error, e:
         print "Error: " + str(e)
         return None
@@ -55,6 +55,7 @@ class MyCallCallback(pj.CallCallback):
         pj.CallCallback.__init__(self, call)
         self.account = account
         self.pin = None
+        self.makecallCall = None
         self.roomCall = None
 
     def on_dtmf_digit(self, digits):
@@ -73,8 +74,11 @@ class MyCallCallback(pj.CallCallback):
             except pj.Error as e:
                 print(e)
             print 'Current call is disconnected'
-
-    # Notification when call's media state has changed.
+            try:
+                if self.makecallCall is not None:
+                    self.makecallCall.hangup()
+            except pj.Error as e:
+                print(e)
 
     def on_media_state(self):
         def async(self):
@@ -102,15 +106,15 @@ class MyCallCallback(pj.CallCallback):
     def broadcastCallback(self, by, text):
         if "decline" in text.lower() or "accept" not in text.lower():
             return False
-        threading.Thread(target=make_call, args=(allowedNumbers[by], self.account, self.player_id, self.call)).start()
+        threading.Thread(target=make_call,
+                         args=(self, allowedNumbers[by], self.account, self.player_id, self.call)).start()
         return True
 
 
 class DoorConnectorCallCallback(pj.CallCallback):
-
     def __init__(self, call, to_disconnect_id, door_call):
         pj.CallCallback.__init__(self, call)
-        #self.doorin_id = doorin_id
+        # self.doorin_id = doorin_id
         self.to_disconnect_id = to_disconnect_id
         self.door_call = door_call
 
@@ -122,11 +126,7 @@ class DoorConnectorCallCallback(pj.CallCallback):
         print "(" + self.call.info().last_reason + ")"
 
         if self.call.info().state == pj.CallState.DISCONNECTED:
-            print 'Current call is disconnected'
-            try:
-                self.door_call.hangup()
-            except pj.Error as e:
-                print(e)
+           pass
         if self.call.info().state == pj.CallState.CONFIRMED:
             self.proceed()
 
@@ -138,8 +138,9 @@ class DoorConnectorCallCallback(pj.CallCallback):
 
     def proceed(self):
         if self.call.info().state == pj.CallState.CONFIRMED and self.call.info().media_state == pj.MediaState.ACTIVE:
-            #lib.conf_disconnect(lib.player_get_slot(self.to_disconnect_id), self.doorin_id)
+            # lib.conf_disconnect(lib.player_get_slot(self.to_disconnect_id), self.doorin_id)
             self.call.transfer_to_call(self.door_call)
+
 
 lib = pj.Lib()
 
