@@ -108,6 +108,7 @@ class MyCallCallback(pj.CallCallback):
             return False
         threading.Thread(target=make_call,
                          args=(self, allowedNumbers[by], self.account, self.player_id, self.call)).start()
+        tcomm.sendBroadcast("Call delegated to " + allowedNumbers[by])
         return True
 
 
