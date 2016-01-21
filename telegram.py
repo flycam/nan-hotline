@@ -36,9 +36,9 @@ class TelegramComm():
         self.talkCallback = None
         self.api_url = self.TELEGRAM_API_URL.format(botToken)
         self.userList = userList
-        server = SocketServer.TCPServer(("0.0.0.0", localPort), TelegramWebhookHandler)
-        server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        threading.Thread(target=server.serve_forever).start()
+        self.server = SocketServer.TCPServer(("0.0.0.0", localPort), TelegramWebhookHandler)
+        self.server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        threading.Thread(target=self.server.serve_forever).start()
         if not requests.post(self.api_url + "setWebhook", data={"url": url}).json()['ok']:
             raise RuntimeError("Couldn't set webHook!")
 
@@ -56,3 +56,5 @@ class TelegramComm():
         for user in self.userList:
             self.sendRequest("sendMessage",
                              {'chat_id': str(user), 'text': message, 'reply_markup': keyboardMarkup})
+    def close(self):
+        self.server.server_close()
