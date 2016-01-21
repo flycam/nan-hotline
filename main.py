@@ -127,7 +127,14 @@ class DoorConnectorCallCallback(pj.CallCallback):
         print "(" + self.call.info().last_reason + ")"
 
         if self.call.info().state == pj.CallState.DISCONNECTED:
-           pass
+            try:
+                if self.door_call.info().state == pj.CallState.CONFIRMED:
+                    self.door_call.hangup()
+            except pj.Error as e:
+                print(e)
+            except ReferenceError as e:
+                print(e)
+
         if self.call.info().state == pj.CallState.CONFIRMED:
             self.proceed()
 
