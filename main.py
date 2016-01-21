@@ -6,6 +6,7 @@ import _pjsua
 import threading
 from serverconfig import *
 from telegram import TelegramComm
+from config import *
 from time import sleep
 
 
@@ -57,9 +58,21 @@ class MyCallCallback(pj.CallCallback):
         self.pin = None
         self.makecallCall = None
         self.roomCall = None
+        self.currentNode = graph.firstNode
+        self.speech_player_id = None
+        self.music_player_id = None
+        self.path = []
 
     def on_dtmf_digit(self, digits):
         print("DTMF:", digits)
+        try:
+            self.currentNode = self.currentNode.get_following_node(digits[0])
+        except KeyError:
+            print("Does not exist")
+        else:
+            print("Changed node. New id is {}".format(self.currentNode.id))
+            self.path.append(self.currentNode.description)
+            self.playNode()
 
     # Notification when call state has changed
     def on_state(self):
@@ -91,23 +104,42 @@ class MyCallCallback(pj.CallCallback):
                 # Connect the call to sound device
                 call_slot = self.call.info().conf_slot
                 print "Media is now active"
-                player_id = lib.create_player("sounds/pausenmusik.wav", loop=True)
-                lib.conf_connect(lib.player_get_slot(player_id), self.call.info().conf_slot)
-                lib.conf_set_rx_level(lib.player_get_slot(player_id), .1)
-                self.player_id = player_id
-                tcomm.sendBroadcast("Incomming support request by " + self.call.info().remote_uri,
-                                    {'keyboard': [["Accept call"], ['Decline call']], "resize_keyboard": True,
-                                     "one_time_keyboard": True}, self.broadcastCallback)
+                self.music_player_id = lib.create_player("sounds/pausenmusik.wav", loop=True)
+                lib.conf_connect(lib.player_get_slot(self.music_player_id), self.call.info().conf_slot)
+                lib.conf_set_rx_level(lib.player_get_slot(self.music_player_id), 0.04)
+
+                self.playNode()
+
             else:
                 print "Media is inactive"
 
         threading.Thread(target=async, args=(self,)).start()
 
+    def playNode(self):
+        if self.speech_player_id is not None:
+            lib.conf_disconnect(lib.player_get_slot(self.speech_player_id), self.call.info().conf_slot)
+            lib.player_destroy(self.speech_player_id)
+
+        self.speech_player_id = lib.create_player(self.currentNode.get_filename("de"))
+        lib.conf_connect(lib.player_get_slot(self.speech_player_id), self.call.info().conf_slot)
+
+        if self.currentNode.id == -1:
+            print("Technischer Mitarbeiter")
+            tcomm.sendBroadcast("Incomming support request by " + self.call.info().remote_uri + "\nPath: " + "->".join(self.path),
+                                        {'keyboard': [["Accept call"], ['Decline call']], "resize_keyboard": True,
+                                         "one_time_keyboard": True}, self.broadcastCallback)
+
+            sleep(5)
+            for i in range(100):
+                lib.conf_set_rx_level(lib.player_get_slot(self.music_player_id), 0.04 + i / 1000.0)
+                sleep(0.03)
+
+
     def broadcastCallback(self, by, text):
         if "decline" in text.lower() or "accept" not in text.lower():
             return False
         threading.Thread(target=make_call,
-                         args=(self, allowedNumbers[by], self.account, self.player_id, self.call)).start()
+                         args=(self, allowedNumbers[by], self.account, self.music_player_id, self.call)).start()
         tcomm.sendBroadcast("Call delegated to " + allowedNumbers[by])
         return True
 
@@ -154,6 +186,8 @@ lib = pj.Lib()
 
 tcomm = TelegramComm("https://nan.uni-karlsruhe.de/janis", 8080, telegram_token,
                      allowedNumbers.keys())
+
+graph = CommunicationGraph("config")
 
 try:
     mcfg = pj.MediaConfig()

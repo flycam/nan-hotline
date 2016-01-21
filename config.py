@@ -4,8 +4,9 @@ import re
 class CommunicationGraph(object):
     def __init__(self, filename):
         self.nodes = {}
-        rex = re.compile(r'^([0-9]*) ?- ?([^-]*) ?- ?\[(.*)\]$')
-        folRex = re.compile(r'^ *([0-9\*#]*):([0-9]*) *$')
+        self.firstNode = None
+        rex = re.compile(r'^(-?[0-9]*) ?- ?([^-]*) ?- ?\[(.*)\]$')
+        folRex = re.compile(r'^ *([0-9\*#]*):(-?[0-9]*) *$')
         with open(filename, 'r') as f:
             for line in f.readlines():
                 groups = rex.match(line).groups()
@@ -20,6 +21,9 @@ class CommunicationGraph(object):
                 node.graph = self
 
                 self.nodes[node.id] = node
+
+                if self.firstNode is None:
+                    self.firstNode = node
 
     def getNodeById(self, id):
         return self.nodes[id]
