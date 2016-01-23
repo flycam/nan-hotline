@@ -27,6 +27,7 @@ class TelegramComm():
                 if not message['from']['id'] in userList:
                     self.sendRequest("sendMessage", {"chat_id": message['chat']['id'],
                                                      "text": "My mom told me not to talk to strangers."})
+                    print message['from']['id'] + " not in userlist. "
                     return
                 if self.talkCallback is not None and self.talkCallback(message['from']['id'], message['text']):
                     self.talkCallback = None
@@ -54,7 +55,7 @@ class TelegramComm():
 
     def sendBroadcast(self, message, keyboardMarkup=None, callback=None):
         if keyboardMarkup is None:
-            keyboardMarkup = {"hide_keyboard":True}
+            keyboardMarkup = {"hide_keyboard": True}
         if callback is not None:
             self.talkCallback = callback
         for user in self.userList:
