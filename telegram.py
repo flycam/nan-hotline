@@ -7,7 +7,7 @@ import json
 import urllib
 
 
-class TelegramComm():
+class TelegramComm(object):
     TELEGRAM_API_URL = "https://api.telegram.org/bot{}/"
 
     def __init__(self, url, localPort, botToken, userList):
