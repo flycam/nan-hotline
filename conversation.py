@@ -2,6 +2,7 @@ import pjsua as pj
 from time import sleep
 import threading
 import _pjsua
+import random
 
 
 class Conversation(object):
@@ -101,25 +102,29 @@ class Conversation(object):
                 threading.Thread(target=async).start()
 
             def play_node(self):
-                if self.speech_player_id is not None:
-                    conv.lib.conf_disconnect(lib.player_get_slot(self.speech_player_id), self.call.info().conf_slot)
-                    conv.lib.player_destroy(self.speech_player_id)
+                def async():
+                    thread_desc = 0;
+                    err = _pjsua.thread_register("python worker callback node "+ str(conv.current_node.id) + str(conv.get_id()), thread_desc)
+                    if self.speech_player_id is not None:
+                        conv.lib.conf_disconnect(lib.player_get_slot(self.speech_player_id), self.call.info().conf_slot)
+                        conv.lib.player_destroy(self.speech_player_id)
 
-                self.speech_player_id = conv.lib.create_player(conv.current_node.get_filename("de"))
-                conv.lib.conf_connect(lib.player_get_slot(self.speech_player_id), self.call.info().conf_slot)
+                    self.speech_player_id = conv.lib.create_player(conv.current_node.get_filename("de"))
+                    conv.lib.conf_connect(lib.player_get_slot(self.speech_player_id), self.call.info().conf_slot)
 
-                if conv.current_node.id == -1:
-                    print("Technischer Mitarbeiter")
-                    conv.supporter_manager.get_available_supporter(self.avail_callback, conv)
+                    if conv.current_node.id == -1:
+                        print("Technischer Mitarbeiter")
+                        conv.supporter_manager.get_available_supporter(self.avail_callback, conv)
 
-                    sleep(5)
-                    for i in range(100):
-                        lib.conf_set_rx_level(lib.player_get_slot(self.music_player_id), 0.04 + i / 1000.0)
-                        sleep(0.03)
-                elif conv.current_node.id == -2:
-                    print("Kein technischer Mitarbeiter")
-                    sleep(8)
-                    self.call.hangup()
+                        sleep(5)
+                        for i in range(100):
+                            lib.conf_set_rx_level(lib.player_get_slot(self.music_player_id), 0.04 + i / 1000.0)
+                            sleep(0.03)
+                    elif conv.current_node.id == -2:
+                        print("Kein technischer Mitarbeiter")
+                        sleep(8)
+                        self.call.hangup()
+                threading.Thread(target=async).start()
 
             def stop_music(self):
                 lib.conf_disconnect(lib.player_get_slot(self.music_player_id), self.call.info().conf_slot)
@@ -161,7 +166,7 @@ class Conversation(object):
         self.conversation_graph = conversation_graph
         self.current_node = conversation_graph.get_first_node(queue_call.info().remote_uri)
         self.lib = lib
-        self.id = 42
+        self.id = random.randint(0, 500000)
         self.supporter_manager = supporter_manager
         queue_call.set_callback(QueueCallback(queue_call))
         queue_call.answer(200, "Call accepted by bot.")
