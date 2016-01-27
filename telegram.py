@@ -79,10 +79,10 @@ class TelegramFrontend(Frontend):
     def get_available_supporter(self, conversation):
         self.telegram.sendBroadcast(
             "Incomming support request by " + conversation.queue_call.info().remote_uri + "\nPath: " + "->".join(
-                    [p.description for p in conversation.path]) + "\n/accept " + str(conversation.get_id()) +
-            "\n/decline " + str(conversation.get_id()),
-            {'keyboard': [["/accept " + str(conversation.get_id()) + ""],
-                          ['/decline ' + str(conversation.get_id()) + ""]], "resize_keyboard": True,
+                    [p.description for p in conversation.path]) + "\n/accept_" + str(conversation.get_id()) +
+            "\n/decline_" + str(conversation.get_id()),
+            {'keyboard': [["/accept_" + str(conversation.get_id()) + ""],
+                          ['/decline_' + str(conversation.get_id()) + ""]], "resize_keyboard": True,
              "one_time_keyboard": True}, self.__broadcast_callback)
 
     def call_delegated_to(self, supporter, conversation):
@@ -101,7 +101,7 @@ class TelegramFrontend(Frontend):
             return
 
         if "/accept" in text:
-            rex = re.compile(r'/accept (.*)')
+            rex = re.compile(r'/accept_(.*)')
             m = rex.match(text)
             if m is None:
                 print("Supporter reply has invalid format (accept)")
@@ -110,7 +110,7 @@ class TelegramFrontend(Frontend):
 
             self.supporter_available_callback(token, selected_supporter)
         elif "/decline" in text:
-            rex = re.compile(r'/decline (.*)')
+            rex = re.compile(r'/decline_(.*)')
             m = rex.match(text)
             if m is None:
                 print("Supporter reply has invalid format (decline)")
