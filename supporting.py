@@ -1,5 +1,6 @@
 import json
 import telegram
+import threading
 
 
 class Supporter(object):
@@ -25,14 +26,22 @@ class SupporterManager(object):
         self.requests = []
 
     def get_available_supporter(self, supporter_available_callback, conversation):
-        self.requests.append(SupportRequest(supporter_available_callback, conversation, str(conversation.get_id())))
+        request = SupportRequest(supporter_available_callback, conversation, str(conversation.get_id()))
+        self.requests.append(request)
         for frontend in self.frontends:
             frontend.get_available_supporter(conversation)
+
+        def timeout():
+            self.__callback(request.token, None)
+
+        threading.Timer(10.0, timeout).start()
 
     def __callback(self, token, supporter):
         for request in self.requests:
             if request.token == token:
                 request.callback(supporter)
                 self.requests.remove(request)
+                for frontend in self.frontends:
+                    frontend.call_delegated_to(supporter)
                 return
         print("Got available supporter for not (anymore) existing request")
