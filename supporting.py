@@ -34,7 +34,7 @@ class SupporterManager(object):
         def timeout():
             self.__callback(request.token, None)
 
-        threading.Timer(10.0, timeout).start()
+        threading.Timer(5 * 60, timeout).start()
 
     def __callback(self, token, supporter):
         for request in self.requests:
@@ -42,6 +42,6 @@ class SupporterManager(object):
                 request.callback(supporter)
                 self.requests.remove(request)
                 for frontend in self.frontends:
-                    frontend.call_delegated_to(supporter)
+                    frontend.call_delegated_to(supporter, request.conversation)
                 return
         print("Got available supporter for not (anymore) existing request")

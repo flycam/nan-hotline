@@ -51,6 +51,7 @@ class Conversation(object):
                 self.roomCall = None
                 self.speech_player_id = None
                 self.music_player_id = None
+                call.remote_uri = call.info().remote_uri
 
             def on_dtmf_digit(self, digits):
                 print("DTMF:", digits)
@@ -115,15 +116,28 @@ class Conversation(object):
                     for i in range(100):
                         lib.conf_set_rx_level(lib.player_get_slot(self.music_player_id), 0.04 + i / 1000.0)
                         sleep(0.03)
+                elif conv.current_node.id == -2:
+                    print("Kein technischer Mitarbeiter")
+                    sleep(8)
+                    self.call.hangup()
 
             def stop_music(self):
                 lib.conf_disconnect(lib.player_get_slot(self.music_player_id), self.call.info().conf_slot)
                 lib.player_destroy(self.music_player_id)
 
             def avail_callback(self, supporter):
-                print "AVAIL called by " + str(supporter)
-                if supporter is not None:
-                    self.make_call(supporter.sip_id)
+                def async():
+                    thread_desc = 0;
+                    err = _pjsua.thread_register("python worker callback timeout "+ str(conv.get_id()), thread_desc)
+                    print "AVAIL called by " + str(supporter)
+                    if supporter is not None:
+                        self.make_call(supporter.sip_id)
+                    else:
+                        conv.current_node = conv.conversation_graph.getNodeById(-2)
+                        conv.path.append(conv.current_node)
+                        self.play_node()
+
+                threading.Thread(target=async).start()
 
             def make_call(self, uri):
                 def async():

@@ -84,8 +84,11 @@ class TelegramFrontend(Frontend):
                           ['Decline call [' + str(conversation.get_id()) + "]"]], "resize_keyboard": True,
              "one_time_keyboard": True}, self.__broadcast_callback)
 
-    def call_delegated_to(self, supporter):
-        self.telegram.sendBroadcast("Call delegated to " + supporter.name)
+    def call_delegated_to(self, supporter, conversation):
+        if supporter is None:
+            self.telegram.sendBroadcast("Call to {} declined.".format(conversation.queue_call.remote_uri))
+            return
+        self.telegram.sendBroadcast("Call {} delegated to {}".format(conversation.queue_call.remote_uri, supporter.name))
 
     def __broadcast_callback(self, from_telegram_user, text):
         if "Accept call " in text:
