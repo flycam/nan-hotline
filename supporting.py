@@ -25,7 +25,7 @@ class SupporterManager(object):
         self.requests = []
 
     def get_available_supporter(self, supporter_available_callback, conversation):
-        self.requests.append(SupportRequest(supporter_available_callback, conversation, conversation.get_id()))
+        self.requests.append(SupportRequest(supporter_available_callback, conversation, str(conversation.get_id())))
         for frontend in self.frontends:
             frontend.get_available_supporter(conversation)
 

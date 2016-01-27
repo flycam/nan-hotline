@@ -5,7 +5,7 @@ import _pjsua
 
 
 class Conversation(object):
-    def __init__(self, queue_call, account, conversation_graph, lib):
+    def __init__(self, queue_call, account, conversation_graph, lib, supporter_manager):
         conv = self
 
         class QueueCallback(pj.CallCallback):
@@ -74,12 +74,15 @@ class Conversation(object):
 
                 if conv.current_node.id == -1:
                     print("Technischer Mitarbeiter")
-                    # TODO: Support manager
+                    conv.supporter_manager.get_available_supporter(self.avail_callback, conv)
 
                     sleep(5)
                     for i in range(100):
                         lib.conf_set_rx_level(lib.player_get_slot(self.music_player_id), 0.04 + i / 1000.0)
                         sleep(0.03)
+
+            def avail_callback(self, supporter):
+                print "AVAIL called by " + str(supporter)
 
         self.queue_call = queue_call
         self.path = []
@@ -88,5 +91,10 @@ class Conversation(object):
         self.conversation_graph = conversation_graph
         self.current_node = conversation_graph.get_first_node(queue_call.info().remote_uri)
         self.lib = lib
+        self.id = 42
+        self.supporter_manager = supporter_manager
         queue_call.set_callback(QueueCallback(queue_call))
         queue_call.answer(200, "Call accepted by bot.")
+
+    def get_id(self):
+        return self.id

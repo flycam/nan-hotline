@@ -78,10 +78,10 @@ class TelegramFrontend(Frontend):
 
     def get_available_supporter(self, conversation):
         self.telegram.sendBroadcast(
-            "Incomming support request by " + conversation.call.info().remote_uri + "\nPath: " + "->".join(
-                conversation.path),
-            {'keyboard': [["Accept call [" + conversation.get_id() + "]"],
-                          ['Decline call [' + conversation.get_id()] + "]"], "resize_keyboard": True,
+            "Incomming support request by " + conversation.queue_call.info().remote_uri + "\nPath: " + "->".join(
+                    [p.description for p in conversation.path]),
+            {'keyboard': [["Accept call [" + str(conversation.get_id()) + "]"],
+                          ['Decline call [' + str(conversation.get_id()) + "]"]], "resize_keyboard": True,
              "one_time_keyboard": True}, self.__broadcast_callback)
 
     def __broadcast_callback(self, from_telegram_user, text):
@@ -94,7 +94,7 @@ class TelegramFrontend(Frontend):
                 print("Got reply from unknown supporter telegram_id={}".format(from_telegram_user))
                 return
 
-            rex = re.compile(r'Accept call \[([^\]])*\]')
+            rex = re.compile(r'Accept call \[([^\]]*)\]')
             m = rex.match(text)
             if m is None:
                 print("Supporter reply has invalid format")

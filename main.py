@@ -7,6 +7,7 @@ from serverconfig import *
 from telegram import TelegramComm
 from config import *
 from conversation import Conversation
+from supporting import SupporterManager
 
 
 def log_cb(level, str, len):
@@ -31,7 +32,8 @@ class MyAccountCallback(pj.AccountCallback):
     def on_incoming_call(self, call):
         global graph
         global lib
-        Conversation(call, self.account, graph, lib)
+        global supp_man
+        Conversation(call, self.account, graph, lib, supp_man)
 
 
 def make_call(callcallback, uri, acc, to_disconnect_id, door_call):
@@ -90,11 +92,8 @@ class DoorConnectorCallCallback(pj.CallCallback):
 
 lib = pj.Lib()
 
-tcomm = TelegramComm("https://nan.uni-karlsruhe.de/janis", 8080, telegram_token,
-                     allowedNumbers.keys())
-
 graph = CommunicationGraph("config")
-
+supp_man = SupporterManager()
 try:
     mcfg = pj.MediaConfig()
     mcfg.no_vad = True
@@ -116,7 +115,7 @@ try:
     sys.stdin.readline()
 
     lib.destroy()
-    tcomm.close()
+    #tcomm.close()
     lib = None
 
 except pj.Error, e:
