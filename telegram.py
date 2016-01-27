@@ -5,6 +5,8 @@ import socket
 import threading
 import json
 import urllib
+from frontend import Frontend
+import serverconfig
 
 
 class TelegramComm(object):
@@ -64,3 +66,20 @@ class TelegramComm(object):
 
     def close(self):
         self.server.shutdown()
+
+
+class TelegramFrontend(Frontend):
+    def __init__(self, supporters, supporter_available_callback):
+        super(TelegramFrontend, self).__init__(supporters, supporter_available_callback)
+        self.telegram = TelegramComm("https://nan.uni-karlsruhe.de/janis", 8080, serverconfig.telegram_token,
+                                     serverconfig.allowedNumbers.keys())
+
+    def get_available_supporter(self, conversation):
+        self.telegram.sendBroadcast("Incomming support request by " + conversation.call.info().remote_uri + "\nPath: " + "->".join(conversation.path),
+                                        {'keyboard': [["Accept call " + conversation.get_id()], ['Decline call ' + conversation.get_id()]], "resize_keyboard": True,
+                                         "one_time_keyboard": True}, self.__broadcast_callback)
+
+    def __broadcast_callback(self, from_telegram_user, text):
+        if "Accept call " in text:
+            # TODO  Parse token and supporter
+            self.supporter_available_callback(token, supporter)
