@@ -30,7 +30,7 @@ class TelegramComm(object):
                 if not message['from']['id'] in userList:
                     self.sendRequest("sendMessage", {"chat_id": message['chat']['id'],
                                                      "text": "My mom told me not to talk to strangers."})
-                    print message['from']['id'] + " not in userlist. "
+                    print str(message['from']['id']) + " not in userlist. "
                     return
                 if self.talkCallback is not None and self.talkCallback(message['from']['id'], message['text']):
                     self.talkCallback = None
