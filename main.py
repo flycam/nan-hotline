@@ -36,60 +36,6 @@ class MyAccountCallback(pj.AccountCallback):
         Conversation(call, self.account, graph, lib, supp_man)
 
 
-def make_call(callcallback, uri, acc, to_disconnect_id, door_call):
-    try:
-        thread_desc = 0;
-        err = _pjsua.thread_register("python call worker" + uri, thread_desc)
-        global lib
-        # make a call
-        print "Making call to", uri
-        call = acc.make_call(uri)
-        call_cb = DoorConnectorCallCallback(call, to_disconnect_id, door_call)
-        call.set_callback(call_cb)
-        callcallback.makecallCall = call
-    except pj.Error, e:
-        print "Error: " + str(e)
-        return None
-
-
-class DoorConnectorCallCallback(pj.CallCallback):
-    def __init__(self, call, to_disconnect_id, door_call):
-        pj.CallCallback.__init__(self, call)
-        # self.doorin_id = doorin_id
-        self.to_disconnect_id = to_disconnect_id
-        self.door_call = door_call
-
-    # Notification when call state has changed
-    def on_state(self):
-        print "Call with", self.call.info().remote_uri,
-        print "is", self.call.info().state_text,
-        print "last code =", self.call.info().last_code,
-        print "(" + self.call.info().last_reason + ")"
-
-        if self.call.info().state == pj.CallState.DISCONNECTED:
-            try:
-                if self.door_call.info().state == pj.CallState.CONFIRMED:
-                    self.door_call.hangup()
-            except pj.Error as e:
-                print(e)
-            except ReferenceError as e:
-                print(e)
-
-        if self.call.info().state == pj.CallState.CONFIRMED:
-            self.proceed()
-
-    # Notification when call's media state has changed.
-
-    def on_media_state(self):
-        if self.call.info().media_state == pj.MediaState.ACTIVE:
-            self.proceed()
-
-    def proceed(self):
-        if self.call.info().state == pj.CallState.CONFIRMED and self.call.info().media_state == pj.MediaState.ACTIVE:
-            # lib.conf_disconnect(lib.player_get_slot(self.to_disconnect_id), self.doorin_id)
-            self.call.transfer_to_call(self.door_call)
-
-
 lib = pj.Lib()
 
 graph = CommunicationGraph("config")

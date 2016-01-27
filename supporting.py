@@ -1,12 +1,13 @@
 import json
 import telegram
+import codecs
 
 
 class Supporter(object):
     def __init__(self, name, telegram_id, sip_id):
-        self.name = name
+        self.name = str(name)
         self.telegram_id = telegram_id
-        self.sip_id = sip_id
+        self.sip_id = str(sip_id)
 
 
 class SupportRequest(object):
@@ -18,7 +19,7 @@ class SupportRequest(object):
 
 class SupporterManager(object):
     def __init__(self):
-        supporters_dict = json.load(file('supporters'))
+        supporters_dict = json.load(open('supporters', 'r'))
         self.supporters = [Supporter(**args) for args in supporters_dict]
         self.frontends = [telegram.TelegramFrontend(self.supporters, self.__callback)]
 
