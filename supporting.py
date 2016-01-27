@@ -1,6 +1,5 @@
 import json
 import telegram
-import codecs
 
 
 class Supporter(object):
