@@ -122,7 +122,8 @@ class Conversation(object):
 
             def avail_callback(self, supporter):
                 print "AVAIL called by " + str(supporter)
-                self.make_call(supporter.sip_id)
+                if supporter is not None:
+                    self.make_call(supporter.sip_id)
 
             def make_call(self, uri):
                 def async():
