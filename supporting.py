@@ -24,12 +24,14 @@ class SupporterManager(object):
     def __init__(self):
         supporters_dict = json.load(open('supporters', 'r'))
         self.supporters = [Supporter(**args) for args in supporters_dict]
-        self.frontends = [telegram.TelegramFrontend(self.supporters, self.__supporter_accepted_cb, self.__supporter_declined_cb)]
+        self.frontends = [
+            telegram.TelegramFrontend(self.supporters, self.__supporter_accepted_cb, self.__supporter_declined_cb)]
 
         self.requests = []
 
     def get_available_supporter(self, supporter_available_callback, conversation):
-        request = SupportRequest(supporter_available_callback, conversation, str(conversation.get_id()), self.supporters)
+        request = SupportRequest(supporter_available_callback, conversation, str(conversation.get_id()),
+                                 self.supporters)
         self.requests.append(request)
         for frontend in self.frontends:
             frontend.get_available_supporter(conversation)
@@ -56,7 +58,6 @@ class SupporterManager(object):
 
                 if all(request.supporter_declined.values()):
                     self.__supporter_accepted_cb(token, None)
-
 
     def close(self):
         for frontend in self.frontends:
