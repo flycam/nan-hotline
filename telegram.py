@@ -72,8 +72,9 @@ class TelegramComm(object):
 class TelegramFrontend(Frontend):
     def __init__(self, supporters, supporter_available_callback):
         super(TelegramFrontend, self).__init__(supporters, supporter_available_callback)
+        user_list = [s.telegram_id for s in supporters]
         self.telegram = TelegramComm("https://nan.uni-karlsruhe.de/janis", 8080, serverconfig.telegram_token,
-                                     serverconfig.allowedNumbers.keys())
+                                     user_list)
 
     def get_available_supporter(self, conversation):
         self.telegram.sendBroadcast(
