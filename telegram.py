@@ -70,8 +70,8 @@ class TelegramComm(object):
 
 
 class TelegramFrontend(Frontend):
-    def __init__(self, supporters, supporter_available_callback):
-        super(TelegramFrontend, self).__init__(supporters, supporter_available_callback)
+    def __init__(self, supporters, supporter_available_callback, supporter_declined_cb):
+        super(TelegramFrontend, self).__init__(supporters, supporter_available_callback, supporter_declined_cb)
         user_list = [s.telegram_id for s in supporters]
         self.telegram = TelegramComm("https://nan.uni-karlsruhe.de/janis", 8080, serverconfig.telegram_token,
                                      user_list)
@@ -91,23 +91,32 @@ class TelegramFrontend(Frontend):
         self.telegram.sendBroadcast("Call {} delegated to {}".format(conversation.queue_call.remote_uri, supporter.name))
 
     def __broadcast_callback(self, from_telegram_user, text):
-        if "Accept call " in text:
-            selected_supporter = None
-            for supporter in self.supporters:
-                if supporter.telegram_id == from_telegram_user:
-                    selected_supporter = supporter
-            if selected_supporter is None:
-                print("Got reply from unknown supporter telegram_id={}".format(from_telegram_user))
-                return
+        selected_supporter = None
+        for supporter in self.supporters:
+            if supporter.telegram_id == from_telegram_user:
+                selected_supporter = supporter
+        if selected_supporter is None:
+            print("Got reply from unknown supporter telegram_id={}".format(from_telegram_user))
+            return
 
+        if "Accept call " in text:
             rex = re.compile(r'Accept call \[([^\]]*)\]')
             m = rex.match(text)
             if m is None:
-                print("Supporter reply has invalid format")
+                print("Supporter reply has invalid format (accept)")
                 return
             token = m.groups()[0]
 
             self.supporter_available_callback(token, selected_supporter)
+        elif "Decline call " in text:
+            rex = re.compile(r'Decline call \[([^\]]*)\]')
+            m = rex.match(text)
+            if m is None:
+                print("Supporter reply has invalid format (decline)")
+                return
+            token = m.groups()[0]
+
+            self.supporter_declined_callback(token, selected_supporter)
 
     def close(self):
         self.telegram.close()
