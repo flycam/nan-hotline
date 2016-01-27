@@ -8,3 +8,6 @@ class Frontend(object):
 
     def call_delegated_to(self, supporter, conversation):
         pass
+    
+    def close(self):
+        pass

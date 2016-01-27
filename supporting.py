@@ -45,3 +45,7 @@ class SupporterManager(object):
                     frontend.call_delegated_to(supporter, request.conversation)
                 return
         print("Got available supporter for not (anymore) existing request")
+
+    def close(self):
+        for frontend in self.frontends:
+            frontend.close()

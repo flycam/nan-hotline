@@ -108,3 +108,6 @@ class TelegramFrontend(Frontend):
             token = m.groups()[0]
 
             self.supporter_available_callback(token, selected_supporter)
+
+    def close(self):
+        self.telegram.close()

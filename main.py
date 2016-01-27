@@ -61,7 +61,7 @@ try:
     sys.stdin.readline()
 
     lib.destroy()
-    #tcomm.close()
+    supp_man.close()
     lib = None
 
 except pj.Error, e:
