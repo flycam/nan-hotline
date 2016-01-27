@@ -34,6 +34,9 @@ class CommunicationGraph(object):
             string += '\n' + str(n)
         return string
 
+    def get_first_node(self, sip_account):
+        return self.firstNode
+
 
 class CommunicationNode(object):
     def __init__(self):
