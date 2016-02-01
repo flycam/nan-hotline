@@ -66,14 +66,33 @@ def get_db_connection():
     return connection
 
 
-def create_conversation():
+def create_conversation(supporter_phone, sip_uri, path):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO cases DEFAULT VALUES RETURNING id;")
+
+    if supporter_phone is not None:
+        assigned_supporter_id = supporter_phone.supporter.id
+        supporter_phone_id = supporter_phone.id
+    else:
+        assigned_supporter_id = None
+        supporter_phone_id = None
+
+    cursor.execute("INSERT INTO cases (assigned_supporter) VALUES (%s) RETURNING id;", (assigned_supporter_id,))
     case_id = cursor.fetchone()[0]
     print("Created case with id {}".format(case_id))
-    cursor.execute("")
+    cursor.execute(
+        """
+        INSERT INTO wizard_calls ("case", "time", path, supportee_sip_uri, supporter_phone)
+        VALUES (%s, now(), %s, %s, %s)
+        RETURNING id;
+        """,
+        (case_id, path, sip_uri, supporter_phone_id)
+    )
+    call_id = cursor.fetchone()[0]
+    print("Created call with id {}".format(call_id))
+    conn.commit()
 
 if __name__ == "__main__":
-    res = Supporter.get_all()
-    print(', '.join(map(str, res)))
+    sp = SupporterPhone()
+    sp.id = 1
+    create_conversation(None, "not really a sip uri", "1->2")

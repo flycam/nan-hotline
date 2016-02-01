@@ -3,6 +3,7 @@ from time import sleep
 import threading
 import _pjsua
 import random
+import db
 
 
 class Conversation(object):
@@ -134,7 +135,8 @@ class Conversation(object):
                 def async():
                     thread_desc = 0;
                     err = _pjsua.thread_register("python worker callback timeout "+ str(conv.get_id()), thread_desc)
-                    print "AVAIL called by supporter {} | phone {}".format(supporter_phone.supporter, supporter_phone)
+                    print "AVAIL called by supporter phone {}".format(supporter_phone)
+                    db.create_conversation(supporter_phone, self.call.info().remote_uri, "->".join([n.description for n in conv.path]))
                     if supporter_phone is not None:
                         self.make_call(supporter_phone.sip_uri)
                     else:
