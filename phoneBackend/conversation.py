@@ -130,13 +130,13 @@ class Conversation(object):
                 lib.conf_disconnect(lib.player_get_slot(self.music_player_id), self.call.info().conf_slot)
                 lib.player_destroy(self.music_player_id)
 
-            def avail_callback(self, supporter):
+            def avail_callback(self, supporter_phone):
                 def async():
                     thread_desc = 0;
                     err = _pjsua.thread_register("python worker callback timeout "+ str(conv.get_id()), thread_desc)
-                    print "AVAIL called by " + str(supporter)
-                    if supporter is not None:
-                        self.make_call(supporter.sip_id)
+                    print "AVAIL called by supporter {} | phone {}".format(supporter_phone.supporter, supporter_phone)
+                    if supporter_phone is not None:
+                        self.make_call(supporter_phone.sip_uri)
                     else:
                         conv.current_node = conv.conversation_graph.getNodeById(-2)
                         conv.path.append(conv.current_node)

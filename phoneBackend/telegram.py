@@ -65,6 +65,14 @@ class TelegramComm(object):
             self.sendRequest("sendMessage",
                              {'chat_id': str(user), 'text': message, 'reply_markup': keyboardMarkup})
 
+    def sendRequestWithKeyboard(self, user, message, keyboardMarkup=None, callback=None):
+        if keyboardMarkup is None:
+            keyboardMarkup = {"hide_keyboard": True}
+        if callback is not None:
+            self.talkCallback = callback
+        self.sendRequest("sendMessage",
+                         {'chat_id': str(user), 'text': message, 'reply_markup': keyboardMarkup})
+
     def close(self):
         self.server.shutdown()
 
@@ -77,19 +85,24 @@ class TelegramFrontend(Frontend):
                                      user_list)
 
     def get_available_supporter(self, conversation):
-        self.telegram.sendBroadcast(
-            "Incomming support request by " + conversation.queue_call.info().remote_uri + "\nPath: " + "->".join(
-                    [p.description for p in conversation.path]) + "\n/accept_" + str(conversation.get_id()) +
-            "\n/decline_" + str(conversation.get_id()),
-            {'keyboard': [["/accept_" + str(conversation.get_id()) + ""],
-                          ['/decline_' + str(conversation.get_id()) + ""]], "resize_keyboard": True,
-             "one_time_keyboard": True}, self.__broadcast_callback)
+        for supporter in self.supporters:
+            accept_commands = ["/accept_{}_{} <{}>".format(conversation.get_id(), p.id, p.sip_uri) for p in supporter.phones]
 
-    def call_delegated_to(self, supporter, conversation):
-        if supporter is None:
+            message_text = "Incomming support request by " + conversation.queue_call.info().remote_uri + "\nPath: " + "->".join(
+                [p.description for p in conversation.path]) + "\n" + '\n'.join(accept_commands) + "\n/decline_" + str(conversation.get_id())
+
+            keyboard = [accept_commands, ['/decline_' + str(conversation.get_id()) + ""]]
+
+            self.telegram.sendRequestWithKeyboard(supporter.telegram_id,
+                                                  message_text,
+                                                  {'keyboard': keyboard, "resize_keyboard": True, "one_time_keyboard": True},
+                                                  self.__broadcast_callback)
+
+    def call_delegated_to(self, supporter_phone, conversation):
+        if supporter_phone is None:
             self.telegram.sendBroadcast("Call to {} declined.".format(conversation.queue_call.remote_uri))
             return
-        self.telegram.sendBroadcast("Call {} delegated to {}".format(conversation.queue_call.remote_uri, supporter.name))
+        self.telegram.sendBroadcast("Call {} delegated to {} (phone {})".format(conversation.queue_call.remote_uri, supporter_phone.supporter.name, supporter_phone.sip_uri))
 
     def __broadcast_callback(self, from_telegram_user, text):
         selected_supporter = None
@@ -101,14 +114,29 @@ class TelegramFrontend(Frontend):
             return
 
         if "/accept" in text:
-            rex = re.compile(r'/accept_(.*)')
+            rex = re.compile(r'/accept_([0-9]*)_([0-9]*)')
             m = rex.match(text)
             if m is None:
                 print("Supporter reply has invalid format (accept)")
                 return
             token = m.groups()[0]
+            supporterPhoneId = m.groups()[1]
 
-            self.supporter_available_callback(token, selected_supporter)
+            selectedPhone = None
+            for phone in selected_supporter.phones:
+                try:
+                    phoneIdInt = int(supporterPhoneId)
+                except ValueError:
+                    print("Got invalid phone id {}".format(supporterPhoneId))
+                    return
+                if phone.id == phoneIdInt:
+                    selectedPhone = phone
+            if selectedPhone is None:
+                print("Got reply for unknown phone id {}".format(supporterPhoneId))
+                return
+
+
+            self.supporter_available_callback(token, selectedPhone)
         elif "/decline" in text:
             rex = re.compile(r'/decline_(.*)')
             m = rex.match(text)

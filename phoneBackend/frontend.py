@@ -7,7 +7,7 @@ class Frontend(object):
     def get_available_supporter(self, conversation):
         pass
 
-    def call_delegated_to(self, supporter, conversation):
+    def call_delegated_to(self, supporter_phone, conversation):
         pass
 
     def close(self):

@@ -1,13 +1,6 @@
-import json
 import telegram
 import threading
-
-
-class Supporter(object):
-    def __init__(self, name, telegram_id, sip_id):
-        self.name = str(name)
-        self.telegram_id = telegram_id
-        self.sip_id = str(sip_id)
+import db
 
 
 class SupportRequest(object):
@@ -22,8 +15,7 @@ class SupportRequest(object):
 
 class SupporterManager(object):
     def __init__(self):
-        supporters_dict = json.load(open('supporters', 'r'))
-        self.supporters = [Supporter(**args) for args in supporters_dict]
+        self.supporters = db.Supporter.get_all()
         self.frontends = [
             telegram.TelegramFrontend(self.supporters, self.__supporter_accepted_cb, self.__supporter_declined_cb)]
 
@@ -41,13 +33,13 @@ class SupporterManager(object):
 
         threading.Timer(5 * 60, timeout).start()
 
-    def __supporter_accepted_cb(self, token, supporter):
+    def __supporter_accepted_cb(self, token, supporter_phone):
         for request in self.requests:
             if request.token == token:
                 self.requests.remove(request)
-                request.callback(supporter)
+                request.callback(supporter_phone)
                 for frontend in self.frontends:
-                    frontend.call_delegated_to(supporter, request.conversation)
+                    frontend.call_delegated_to(supporter_phone, request.conversation)
                 return
         print("Got available supporter for not (anymore) existing request")
 
