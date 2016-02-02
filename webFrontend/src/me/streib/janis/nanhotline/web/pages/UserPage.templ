@@ -7,7 +7,16 @@
   <table class="table">
 	<tr><th>Id</th><th>Sip uri</th><th></th></tr>
 	<? foreach($telephones){?>
-		<tr><td><?=$id?></td><td><?=$sip_uri?></td></tr>
+		<tr>
+			<td><?=$id?></td>
+			<td><?=$sip_uri?></td>
+			<td>
+				<form action="/telephone/<?=$id?>" method="post">
+					<input type="hidden" name="delete" value="true" />
+					<input type="submit" class="btn btn-danger" value="x" />
+				</form>
+			</td>
+		</tr>
 	<?}?>
   </table>
 </div>

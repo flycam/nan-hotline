@@ -12,11 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import me.streib.janis.nanhotline.web.pages.CaseInspect;
-import me.streib.janis.nanhotline.web.pages.LoginPage;
-import me.streib.janis.nanhotline.web.pages.MainPage;
-import me.streib.janis.nanhotline.web.pages.Page;
-import me.streib.janis.nanhotline.web.pages.UserPage;
+import me.streib.janis.nanhotline.web.pages.*;
 
 import org.cacert.gigi.output.template.Outputable;
 import org.cacert.gigi.output.template.Template;
@@ -36,6 +32,7 @@ public class NANHotline extends HttpServlet {
         mapping.put("/login", new LoginPage());
         mapping.put("/case/*", new CaseInspect());
         mapping.put("/user", new UserPage());
+		mapping.put("/telephone/*", new PhonePage());
     }
 
     @Override

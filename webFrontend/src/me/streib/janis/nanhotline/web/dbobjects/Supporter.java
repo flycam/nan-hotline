@@ -106,4 +106,8 @@ public class Supporter {
         return res;
 
     }
+
+    public int getId() {
+        return id;
+    }
 }
