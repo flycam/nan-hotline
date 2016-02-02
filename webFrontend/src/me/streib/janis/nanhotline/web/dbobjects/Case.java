@@ -14,6 +14,19 @@ public class Case {
     private Supporter assignedSupporter;
     private Status status;
 
+    public static Case getCaseById(int id) throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
+                "SELECT * FROM cases WHERE id=?");
+        prep.setInt(1, id);
+        ResultSet resSet = prep.executeQuery();
+        if (resSet.next()) {
+            Case c = new Case(resSet);
+            resSet.close();
+            return c;
+        }
+        return null;
+    }
+
     public static LinkedList<Case> getUnassignedCases() throws SQLException {
         LinkedList<Case> res = new LinkedList<Case>();
         PreparedStatement prep = DatabaseConnection
