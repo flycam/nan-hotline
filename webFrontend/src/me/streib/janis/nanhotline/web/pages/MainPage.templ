@@ -14,7 +14,7 @@
   <div class="panel-heading"><b>My cases</b></div>
 
   <table class="table">
-	<tr><th>Id</th><th>Title</th><th>Status</th><th></th><th></th></tr>
+	<tr><th>Id</th><th>Title</th><th>Status</th><th></th></tr>
 	<? foreach($my_cases){?>
 	<tr><td><?=$id?></td><td><?=$title?></td><td class="<?=$status?>"><?=$status?></td><td><a href="/case/<?=$id?>" class="btn btn-default"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td></tr>
 	<?}?>
