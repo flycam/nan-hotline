@@ -71,6 +71,7 @@ class Conversation(object):
                 print "(" + self.call.info().last_reason + ")"
 
                 if self.call.info().state == pj.CallState.DISCONNECTED:
+                    conv.supporter_manager.cancel_request(conv)
                     try:
                         self.call.hangup()
                     except pj.Error as e:
@@ -132,6 +133,10 @@ class Conversation(object):
                 lib.player_destroy(self.music_player_id)
 
             def avail_callback(self, supporter_phone):
+                if not self.call.is_valid():
+                    print("AVAIL for call that is not valid anymore")
+                    return
+
                 def async():
                     thread_desc = 0;
                     err = _pjsua.thread_register("python worker callback timeout "+ str(conv.get_id()), thread_desc)

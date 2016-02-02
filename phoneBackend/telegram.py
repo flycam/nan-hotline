@@ -104,6 +104,9 @@ class TelegramFrontend(Frontend):
             return
         self.telegram.sendBroadcast("Call {} delegated to {} (phone {})".format(conversation.queue_call.remote_uri, supporter_phone.supporter.name, supporter_phone.sip_uri))
 
+    def request_canceled(self, request):
+        self.telegram.sendBroadcast("Call request {} canceled".format(request.conversation.queue_call.remote_uri))
+
     def __broadcast_callback(self, from_telegram_user, text):
         selected_supporter = None
         for supporter in self.supporters:

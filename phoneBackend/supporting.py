@@ -33,6 +33,13 @@ class SupporterManager(object):
 
         threading.Timer(5 * 60, timeout).start()
 
+    def cancel_request(self, conversation):
+        for request in self.requests[:]:
+            if request.conversation == conversation:
+                self.requests.remove(request)
+                for frontend in self.frontends:
+                    frontend.request_canceled(request)
+
     def __supporter_accepted_cb(self, token, supporter_phone):
         for request in self.requests:
             if request.token == token:

@@ -10,5 +10,8 @@ class Frontend(object):
     def call_delegated_to(self, supporter_phone, conversation):
         pass
 
+    def request_canceled(self, request):
+        pass
+
     def close(self):
         pass
