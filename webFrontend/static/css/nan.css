@@ -70,3 +70,9 @@ body {
 	width: calc(100% - 25px);
 	float: right;
 }
+.OPEN {
+	color: #f00000;
+}
+.CLOSED {
+	color: #00f000;
+}

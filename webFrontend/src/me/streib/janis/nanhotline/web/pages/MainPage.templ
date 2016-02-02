@@ -1,0 +1,28 @@
+<h1>Howdy <?=$fullname?>!</h1>
+<h2>My Dashboard</h2>
+<div class="panel panel-default">
+  <div class="panel-heading"><b>Unassigned cases</b></div>
+  <div class="panel-body">
+    <p>...</p>
+  </div>
+
+  <table class="table">
+	<tr><th>Id</th><th>Title</th><th>Status</th><th></th></tr>
+	<? foreach($unassigned_cases){?>
+		<tr><td><?=$id?></td><td><?=$title?></td><td class="<?=$status?>"><?=$status?></td><td><a href="/case/<?=$id?>/assign" class="btn btn-success">ASSIGN</a></td></tr>
+	<?}?>
+  </table>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading"><b>My cases</b></div>
+  <div class="panel-body">
+    <p>...</p>
+  </div>
+
+  <table class="table">
+	<tr><th>Id</th><th>Title</th><th>Status</th><th></th><th></th></tr>
+	<? foreach($my_cases){?>
+	<tr><td><?=$id?></td><td><?=$title?></td><td class="<?=$status?>"><?=$status?></td><td><a href="/case/<?=$id?>" class="btn btn-default">VIEW</a></td></tr>
+	<?}?>
+  </table>
+</div>

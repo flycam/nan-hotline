@@ -22,6 +22,9 @@ public class Supporter {
                 "SELECT * FROM supporters WHERE id=?");
         prep.setInt(1, id);
         ResultSet res = prep.executeQuery();
+        if (!res.next()) {
+            return null;
+        }
         Supporter s = new Supporter(res);
         res.close();
         CACHE.put(id, s);
@@ -50,11 +53,13 @@ public class Supporter {
     }
 
     private String name;
+    private int id;
     private String username;
     private LinkedList<Phone> phones = null;
 
     public Supporter(ResultSet res) throws SQLException {
         this.name = res.getString("name");
+        this.id = res.getInt("id");
     }
 
     private static String byteArrayToHexString(byte[] b) {
@@ -65,4 +70,32 @@ public class Supporter {
         return result;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public LinkedList<Phone> getPhones() {
+        return phones;
+    }
+
+    public LinkedList<Case> getCases() throws SQLException {
+        PreparedStatement prep = DatabaseConnection
+                .getInstance()
+                .prepare(
+                        "SELECT * FROM cases WHERE assigned_supporter=? AND status=?::case_status");
+        prep.setInt(1, id);
+        prep.setString(2, Status.OPEN.name().toLowerCase());
+        ResultSet resSet = prep.executeQuery();
+        LinkedList<Case> res = new LinkedList<Case>();
+        while (resSet.next()) {
+            res.add(new Case(resSet));
+        }
+        resSet.close();
+        return res;
+
+    }
 }
