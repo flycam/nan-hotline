@@ -55,10 +55,10 @@ public class Supporter {
     private String name;
     private int id;
     private String username;
-    private LinkedList<Phone> phones = null;
 
     public Supporter(ResultSet res) throws SQLException {
         this.name = res.getString("name");
+        this.username = res.getString("username");
         this.id = res.getInt("id");
     }
 
@@ -78,8 +78,16 @@ public class Supporter {
         return username;
     }
 
-    public LinkedList<Phone> getPhones() {
-        return phones;
+    public LinkedList<Phone> getPhones() throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance()
+                .prepare("SELECT * FROM supporter_phones WHERE supporter=?");
+        prep.setInt(1, id);
+        ResultSet resSet = prep.executeQuery();
+        LinkedList<Phone> res = new LinkedList<>();
+        while(resSet.next()) {
+            res.add(new Phone(resSet));
+        }
+        return res;
     }
 
     public LinkedList<Case> getCases() throws SQLException {

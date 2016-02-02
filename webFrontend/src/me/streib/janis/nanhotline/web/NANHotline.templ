@@ -32,10 +32,15 @@
         </div>
         <div class="navbar-collapse collapse" id="navbar">
           <ul class="nav navbar-nav">
-            <li 
+            <li
             <? if($Dashboard) {?>
             class="active"
             <? } ?>><a href="/"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span> Dashboard</a></li>
+
+            <li
+            <? if($Profile) {?>
+            class="active"
+            <? } ?>><a href="/user"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> Profile</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
            <li>
