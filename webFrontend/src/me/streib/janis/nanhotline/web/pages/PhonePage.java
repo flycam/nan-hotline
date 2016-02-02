@@ -24,12 +24,19 @@ public class PhonePage extends Page {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars) throws IOException, SQLException {
         String pathInfo = req.getPathInfo();
-        int phoneId = Integer.parseInt(pathInfo.substring(
-                pathInfo.lastIndexOf('/') + 1, pathInfo.length()));
-        if (req.getParameter("delete").equals("true")) {
-            Phone.deleteById(phoneId, getUser(req).getId());
+        String substring = pathInfo.substring(
+                pathInfo.lastIndexOf('/') + 1, pathInfo.length());
+        if (substring.equals("add")) {
+            new Phone(req.getParameter("sip_uri"), getUser(req));
             resp.sendRedirect("/user");
             return;
+        } else {
+            int phoneId = Integer.parseInt(substring);
+            if (req.getParameter("delete").equals("true")) {
+                Phone.deleteById(phoneId, getUser(req).getId());
+                resp.sendRedirect("/user");
+                return;
+            }
         }
     }
 
