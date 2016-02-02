@@ -16,8 +16,8 @@ import me.streib.janis.nanhotline.web.pages.CaseInspect;
 import me.streib.janis.nanhotline.web.pages.LoginPage;
 import me.streib.janis.nanhotline.web.pages.MainPage;
 import me.streib.janis.nanhotline.web.pages.Page;
-
 import me.streib.janis.nanhotline.web.pages.UserPage;
+
 import org.cacert.gigi.output.template.Outputable;
 import org.cacert.gigi.output.template.Template;
 import org.json.JSONException;
@@ -35,14 +35,34 @@ public class NANHotline extends HttpServlet {
                 NANHotline.class.getResource("NANHotline.templ"));
         mapping.put("/login", new LoginPage());
         mapping.put("/case/*", new CaseInspect());
-		mapping.put("/user", new UserPage());
-	}
+        mapping.put("/user", new UserPage());
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            handleRequest(req, resp, false);
+            handleRequest(req, resp, Method.GET);
+        } catch (JSONException | SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            handleRequest(req, resp, Method.DELETE);
+        } catch (JSONException | SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            handleRequest(req, resp, Method.PUT);
         } catch (JSONException | SQLException e) {
             e.printStackTrace();
         }
@@ -52,14 +72,14 @@ public class NANHotline extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            handleRequest(req, resp, true);
+            handleRequest(req, resp, Method.POST);
         } catch (JSONException | SQLException e) {
             e.printStackTrace();
         }
     }
 
     private void handleRequest(final HttpServletRequest req,
-            final HttpServletResponse resp, final boolean post)
+            final HttpServletResponse resp, final Method method)
             throws IOException, JSONException, SQLException {
         final String pathInfo = req.getPathInfo();
         resp.setContentType("text/html; charset=utf-8");
@@ -100,16 +120,8 @@ public class NANHotline extends HttpServlet {
                 @Override
                 public void output(PrintWriter out, Map<String, Object> vars) {
                     try {
-                        if (post) {
-                            p.doPost(req, resp, vars);
-                        } else {
-                            p.doGet(req, resp, vars);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (SQLException e) {
+                        routeDo(p, req, resp, vars, method);
+                    } catch (IOException | SQLException e) {
                         e.printStackTrace();
                     }
                 }
@@ -119,10 +131,29 @@ public class NANHotline extends HttpServlet {
             vars.put("year", Calendar.getInstance().get(Calendar.YEAR));
             vars.put("title", p.getName());
             mainTemplate.output(resp.getWriter(), vars);
-        } else if (post) {
-            p.doPost(req, resp, vars);
         } else {
+            routeDo(p, req, resp, vars, method);
+        }
+    }
+
+    private void routeDo(Page p, HttpServletRequest req,
+            HttpServletResponse resp, Map<String, Object> vars, Method method)
+            throws IOException, SQLException {
+        switch (method) {
+        case GET:
             p.doGet(req, resp, vars);
+            break;
+        case POST:
+            p.doPost(req, resp, vars);
+            break;
+        case PUT:
+            p.doPut(req, resp, vars);
+            break;
+        case DELETE:
+            p.doDelete(req, resp, vars);
+            break;
+        default:
+            break;
         }
     }
 }
