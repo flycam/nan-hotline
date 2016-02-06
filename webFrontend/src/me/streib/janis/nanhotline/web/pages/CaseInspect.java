@@ -14,6 +14,7 @@ import me.streib.janis.nanhotline.web.dbobjects.Case;
 import me.streib.janis.nanhotline.web.dbobjects.Status;
 import me.streib.janis.nanhotline.web.dbobjects.Supporter;
 
+import org.cacert.gigi.output.template.Form;
 import org.cacert.gigi.output.template.IterableDataset;
 
 public class CaseInspect extends Page {
@@ -48,9 +49,10 @@ public class CaseInspect extends Page {
             resp.sendError(404);
             return;
         }
+        vars.put("caseform", new CaseForm(req, c));
         vars.put("case_id", c.getId());
         vars.put("open", c.getStatus() == Status.OPEN);
-        vars.put("case_tite", c.getTitle());
+        vars.put("case_title", c.getTitle());
         Supporter supp = c.getAssignedSupporter();
         if (supp != null) {
             vars.put("case_supporter", supp.getName());
@@ -70,6 +72,15 @@ public class CaseInspect extends Page {
             }
         });
         getDefaultTemplate().output(resp.getWriter(), vars);
+    }
+
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+        CaseForm form = Form.getForm(req, CaseForm.class);
+        if (!form.submit(resp.getWriter(), req)) {
+            resp.getWriter().println("Could not save changes");
+        }
+        doGet(req, resp, vars, match);
     }
 
     @Override

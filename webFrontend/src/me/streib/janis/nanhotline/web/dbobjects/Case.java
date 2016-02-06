@@ -84,4 +84,27 @@ public class Case {
         this.assignedSupporter = user;
         return true;
     }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public boolean update() throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
+                "UPDATE cases SET (title, description, status) = (?, ?, ?::case_status) WHERE id=?");
+        prep.setString(1, title);
+        prep.setString(2, description);
+        prep.setString(3, status.name().toLowerCase());
+        prep.setInt(4, id);
+        int updateCount = prep.executeUpdate();
+        return updateCount != 0;
+    }
 }

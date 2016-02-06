@@ -1,13 +1,8 @@
 <h1>Case #<?=$case_id?> <span class="label label-<? if($open) { ?>danger<? } else { ?>success<? } ?>"><? if($open) { ?>Open<? } else { ?>Closed<? } ?></span></h1>
-<h2><?=$case_title?></h2>
 <? if($error_message) { ?>
 <div class="alert alert-info" role="alert"><?=$error_message?></div>
 <? } ?>
-<h3>Case info</h3>
-<table class="table">
-<tr><th>Assigned supporter</th><td><?=$case_supporter?></td></tr>
-<tr><th>Description</th><td><?=$case_description?></td></tr>
-</table>
+<?=$caseform?>
 <h3>Timeline</h3>
 <table class="table">
 <? foreach($actions) { ?>
