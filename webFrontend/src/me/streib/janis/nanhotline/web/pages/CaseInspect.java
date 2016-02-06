@@ -27,8 +27,22 @@ public class CaseInspect extends Page {
             Map<String, Object> vars, Matcher match) throws IOException,
             SQLException {
         String pathInfo = req.getPathInfo();
-        int caseId = Integer.parseInt(pathInfo.substring(
-                pathInfo.lastIndexOf('/') + 1, pathInfo.length()));
+        int caseId = Integer.parseInt(match.group("id"));
+        String action = match.group("action");
+        if (action != null && !action.equals("")) {
+            if (action.equals("assign")) {
+                Case caze = Case.getCaseById(caseId);
+                if (!caze.assign(getUser(req))) {
+                    vars.put("error_message", "Could not assign case to user");
+                } else {
+                    resp.sendRedirect("/case/" + caseId);
+                    return;
+                }
+            } else {
+                vars.put("error_message", "Unknown action");
+            }
+        }
+        
         Case c = Case.getCaseById(caseId);
         if (c == null) {
             resp.sendError(404);

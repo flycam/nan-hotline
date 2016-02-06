@@ -71,4 +71,17 @@ public class Case {
     public String getTitle() {
         return title;
     }
+
+    public boolean assign(Supporter user) throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
+                "UPDATE cases SET assigned_supporter = ? WHERE id=?");
+        prep.setInt(1, user.getId());
+        prep.setInt(2, id);
+        int updateCount = prep.executeUpdate();
+        if (updateCount == 0) {
+            return false;
+        }
+        this.assignedSupporter = user;
+        return true;
+    }
 }

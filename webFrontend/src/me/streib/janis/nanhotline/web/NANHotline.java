@@ -38,7 +38,7 @@ public class NANHotline extends HttpServlet {
                 NANHotline.class.getResource("NANHotline.templ"));
         pageRouter.addPage("^/?$", mainPage);
         pageRouter.addPage("^/login/?$", new LoginPage());
-        pageRouter.addPage("^/case/([0-9]*)$", new CaseInspect());
+        pageRouter.addPage("^/case/(?<id>[0-9]*)(?:/(?<action>.*))?$", new CaseInspect());
         pageRouter.addPage("^/user/?$", new UserPage());
         pageRouter.addPage("^/telephone/(.*)$", new PhonePage());
     }
