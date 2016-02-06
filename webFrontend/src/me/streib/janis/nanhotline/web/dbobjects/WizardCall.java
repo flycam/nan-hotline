@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+import me.streib.janis.nanhotline.web.pages.Page;
+
 import org.cacert.gigi.output.template.Outputable;
 
 public class WizardCall extends Action {
@@ -28,6 +30,7 @@ public class WizardCall extends Action {
         vars.put("supporter",
                 supporterPhone != null ? supporterPhone.getSipUri() : null);
         vars.put("supportee", supporteeSIPURI);
+        vars.put("time", Page.DE_FROMAT_DATE.format(getTime()));
         return getDefaultTemplate();
     }
 

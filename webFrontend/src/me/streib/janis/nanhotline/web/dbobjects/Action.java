@@ -29,7 +29,7 @@ public abstract class Action {
             while (res.next()) {
                 PreparedStatement fetch = DatabaseConnection.getInstance()
                         .prepare(
-                                "SELECT a.*, extract(epoch from a.time) as epoch FROM "
+                                "SELECT a.*, extract(epoch from a.time)*1000 as epoch FROM "
                                         + res.getString("relname")
                                         + " a WHERE id=?");
                 fetch.setInt(1, res.getInt("id"));

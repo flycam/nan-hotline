@@ -3,6 +3,7 @@ package me.streib.janis.nanhotline.web.pages;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.regex.Matcher;
 
@@ -16,6 +17,8 @@ import org.cacert.gigi.output.template.Template;
 public abstract class Page {
     private Template defaultTemplate;
     private String name;
+    public static final SimpleDateFormat DE_FROMAT_DATE = new SimpleDateFormat(
+            "dd.MM.yyyy HH:mm");
 
     public Page(String name) {
         this.name = name;
@@ -32,22 +35,25 @@ public abstract class Page {
      * By default, {@link #doGet()} is called.
      */
     public void doPost(HttpServletRequest req, HttpServletResponse resp,
-                       Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+            Map<String, Object> vars, Matcher match) throws IOException,
+            SQLException {
         doGet(req, resp, vars, match);
     }
 
     public void doPut(HttpServletRequest req, HttpServletResponse resp,
-                      Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+            Map<String, Object> vars, Matcher match) throws IOException,
+            SQLException {
         doGet(req, resp, vars, match);
     }
 
     public void doDelete(HttpServletRequest req, HttpServletResponse resp,
-                         Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+            Map<String, Object> vars, Matcher match) throws IOException,
+            SQLException {
         doGet(req, resp, vars, match);
     }
 
     public abstract void doGet(HttpServletRequest req,
-                               HttpServletResponse resp, Map<String, Object> vars, Matcher match)
+            HttpServletResponse resp, Map<String, Object> vars, Matcher match)
             throws IOException, SQLException;
 
     public String getName() {
