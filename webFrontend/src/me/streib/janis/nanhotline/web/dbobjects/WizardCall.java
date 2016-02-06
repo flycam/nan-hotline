@@ -26,7 +26,6 @@ public class WizardCall extends Action {
     @Override
     public Outputable output(Map<String, Object> vars) {
         vars.put("path", path);
-        System.out.println(supporterPhone);
         vars.put("supporter",
                 supporterPhone != null ? supporterPhone.getSipUri() : null);
         vars.put("supportee", supporteeSIPURI);
