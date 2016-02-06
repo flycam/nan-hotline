@@ -43,6 +43,13 @@ public abstract class Action {
                         }
                     }
                     break;
+                case "comments":
+                    try (ResultSet spec = fetch.executeQuery()) {
+                        if (spec.next()) {
+                            result.add(new CommentAction(spec));
+                        }
+                    }
+                    break;
                 default:
                     Log.getLog().warn("Unknown action",
                             res.getString("tableoid"));

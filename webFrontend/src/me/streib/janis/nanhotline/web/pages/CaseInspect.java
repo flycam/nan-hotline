@@ -43,7 +43,7 @@ public class CaseInspect extends Page {
                 vars.put("error_message", "Unknown action");
             }
         }
-        
+
         Case c = Case.getCaseById(caseId);
         if (c == null) {
             resp.sendError(404);
@@ -71,14 +71,22 @@ public class CaseInspect extends Page {
                 return true;
             }
         });
+        vars.put("commentForm", new CommentForm(req, c));
         getDefaultTemplate().output(resp.getWriter(), vars);
     }
 
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars, Matcher match) throws IOException, SQLException {
-        CaseForm form = Form.getForm(req, CaseForm.class);
-        if (!form.submit(resp.getWriter(), req)) {
-            resp.getWriter().println("Could not save changes");
+    public void doPost(HttpServletRequest req, HttpServletResponse resp,
+            Map<String, Object> vars, Matcher match) throws IOException,
+            SQLException {
+        if (req.getParameter("comment") != null) {
+            Form m = Form.getForm(req, CommentForm.class);
+            m.submit(resp.getWriter(), req);
+        } else {
+            CaseForm form = Form.getForm(req, CaseForm.class);
+            if (!form.submit(resp.getWriter(), req)) {
+                resp.getWriter().println("Could not save changes");
+            }
         }
         doGet(req, resp, vars, match);
     }
