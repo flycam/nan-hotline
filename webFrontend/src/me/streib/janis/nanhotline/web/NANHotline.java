@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,16 +24,18 @@ public class NANHotline extends HttpServlet {
     private Page mainPage = new MainPage();
     private Template mainTemplate;
     private HashMap<String, Page> mapping = new HashMap<String, Page>();
+    private PageRouter pageRouter = new PageRouter();
 
     @Override
     public void init() throws ServletException {
         super.init();
         mainTemplate = new Template(
                 NANHotline.class.getResource("NANHotline.templ"));
-        mapping.put("/login", new LoginPage());
-        mapping.put("/case/*", new CaseInspect());
-        mapping.put("/user", new UserPage());
-		mapping.put("/telephone/*", new PhonePage());
+        pageRouter.addPage("^/?$", mainPage);
+        pageRouter.addPage("^/login/?$", new LoginPage());
+        pageRouter.addPage("^/case/([0-9]*)$", new CaseInspect());
+        pageRouter.addPage("^/user/?$", new UserPage());
+        pageRouter.addPage("^/telephone/(.*)", new PhonePage());
     }
 
     @Override
@@ -85,69 +88,57 @@ public class NANHotline extends HttpServlet {
                     * 24 * 366 + "; preload");
         }
         HashMap<String, Object> vars = new HashMap<String, Object>();
-        Page tmpp = null;
-        if (pathInfo == null || pathInfo == "/") {
-            tmpp = mainPage;
-        } else {
-            tmpp = mapping.get(pathInfo);
-            if (tmpp == null) {
-                tmpp = mapping.get(pathInfo + "/*");
-                if (tmpp == null) {
-                    tmpp = mapping.get(pathInfo.substring(0,
-                            pathInfo.lastIndexOf('/'))
-                            + "/*");
-                    if (tmpp == null) {
-                        resp.sendError(404);
-                        return;
-                    }
-                }
+        final PageRouter.Result routeResult = pageRouter.getPage(pathInfo);
 
-            }
+        if (routeResult == null) {
+            resp.sendError(404);
+            return;
         }
-        if (tmpp.needsLogin() && !Page.isLoggedIn(req)) {
+
+        if (routeResult.page.needsLogin() && !Page.isLoggedIn(req)) {
             req.getSession().setAttribute("redirOrig", pathInfo);
             resp.sendRedirect("/login");
             return;
         }
-        final Page p = tmpp;
-        if (p.needsTemplate()) {
+
+        if (routeResult.page.needsTemplate()) {
 
             Outputable content = new Outputable() {
 
                 @Override
                 public void output(PrintWriter out, Map<String, Object> vars) {
                     try {
-                        routeDo(p, req, resp, vars, method);
+                        routeDo(routeResult.page, req, resp, vars, routeResult.matcher, method);
                     } catch (IOException | SQLException e) {
                         e.printStackTrace();
                     }
                 }
             };
-            vars.put(p.getName(), "");
+            vars.put(routeResult.page.getName(), "");
             vars.put("content", content);
             vars.put("year", Calendar.getInstance().get(Calendar.YEAR));
-            vars.put("title", p.getName());
+            vars.put("title", routeResult.page.getName());
             mainTemplate.output(resp.getWriter(), vars);
         } else {
-            routeDo(p, req, resp, vars, method);
+            routeDo(routeResult.page, req, resp, vars, routeResult.matcher, method);
         }
     }
 
     private void routeDo(Page p, HttpServletRequest req,
-            HttpServletResponse resp, Map<String, Object> vars, Method method)
+            HttpServletResponse resp, Map<String, Object> vars, Matcher match, Method method)
             throws IOException, SQLException {
         switch (method) {
         case GET:
-            p.doGet(req, resp, vars);
+            p.doGet(req, resp, vars, match);
             break;
         case POST:
-            p.doPost(req, resp, vars);
+            p.doPost(req, resp, vars, match);
             break;
         case PUT:
-            p.doPut(req, resp, vars);
+            p.doPut(req, resp, vars, match);
             break;
         case DELETE:
-            p.doDelete(req, resp, vars);
+            p.doDelete(req, resp, vars, match);
             break;
         default:
             break;

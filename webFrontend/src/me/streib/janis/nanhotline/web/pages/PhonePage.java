@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 /**
  * @author Anton Schirg
@@ -17,12 +18,12 @@ public class PhonePage extends Page {
     }
 
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars) throws IOException, SQLException {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars, Matcher match) throws IOException, SQLException {
 
     }
 
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars) throws IOException, SQLException {
+    public void doPost(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars, Matcher match) throws IOException, SQLException {
         String pathInfo = req.getPathInfo();
         String substring = pathInfo.substring(
                 pathInfo.lastIndexOf('/') + 1, pathInfo.length());

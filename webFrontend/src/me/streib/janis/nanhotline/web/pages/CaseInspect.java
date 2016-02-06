@@ -3,6 +3,7 @@ package me.streib.janis.nanhotline.web.pages;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,7 +19,7 @@ public class CaseInspect extends Page {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp,
-            Map<String, Object> vars) throws IOException, SQLException {
+                      Map<String, Object> vars, Matcher match) throws IOException, SQLException {
         String pathInfo = req.getPathInfo();
         int caseId = Integer.parseInt(pathInfo.substring(
                 pathInfo.lastIndexOf('/') + 1, pathInfo.length()));

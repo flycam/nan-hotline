@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,7 +31,7 @@ public class MainPage extends Page {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp,
-            Map<String, Object> vars) throws IOException, SQLException {
+                      Map<String, Object> vars, Matcher match) throws IOException, SQLException {
         vars.put("fullname", getUser(req).getName());
         final LinkedList<Case> unassignedCases = Case.getUnassignedCases();
         vars.put("unassigned_cases", new IterableDataset() {

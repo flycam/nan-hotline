@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 /**
  * @author Anton Schirg
@@ -20,7 +21,7 @@ public class UserPage extends Page {
     }
 
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars) throws IOException, SQLException {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars, Matcher match) throws IOException, SQLException {
         Supporter user = getUser(req);
         vars.put("username", user.getUsername());
         vars.put("fullname", user.getName());

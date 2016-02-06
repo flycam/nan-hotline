@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,22 +32,22 @@ public abstract class Page {
      * By default, {@link #doGet()} is called.
      */
     public void doPost(HttpServletRequest req, HttpServletResponse resp,
-            Map<String, Object> vars) throws IOException, SQLException {
-        doGet(req, resp, vars);
+                       Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+        doGet(req, resp, vars, match);
     }
 
     public void doPut(HttpServletRequest req, HttpServletResponse resp,
-            Map<String, Object> vars) throws IOException, SQLException {
-        doGet(req, resp, vars);
+                      Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+        doGet(req, resp, vars, match);
     }
 
     public void doDelete(HttpServletRequest req, HttpServletResponse resp,
-            Map<String, Object> vars) throws IOException, SQLException {
-        doGet(req, resp, vars);
+                         Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+        doGet(req, resp, vars, match);
     }
 
     public abstract void doGet(HttpServletRequest req,
-            HttpServletResponse resp, Map<String, Object> vars)
+                               HttpServletResponse resp, Map<String, Object> vars, Matcher match)
             throws IOException, SQLException;
 
     public String getName() {
