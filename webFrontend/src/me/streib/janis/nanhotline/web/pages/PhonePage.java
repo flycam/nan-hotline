@@ -24,9 +24,7 @@ public class PhonePage extends Page {
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars, Matcher match) throws IOException, SQLException {
-        String pathInfo = req.getPathInfo();
-        String substring = pathInfo.substring(
-                pathInfo.lastIndexOf('/') + 1, pathInfo.length());
+        String substring = match.group(1);
         if (substring.equals("add")) {
             new Phone(req.getParameter("sip_uri"), getUser(req));
             resp.sendRedirect("/user");
