@@ -92,6 +92,11 @@ public class NANHotline extends HttpServlet {
             resp.setHeader("Strict-Transport-Security", "max-age=" + 60 * 60
                     * 24 * 366 + "; preload");
         }
+        if (pathInfo.equals("/logout")) {
+            req.getSession().invalidate();
+            resp.sendRedirect("/");
+            return;
+        }
         HashMap<String, Object> vars = new HashMap<String, Object>();
         final PageRouter.Result routeResult = pageRouter.getPage(pathInfo);
 
@@ -124,7 +129,8 @@ public class NANHotline extends HttpServlet {
             vars.put("content", content);
             vars.put("year", Calendar.getInstance().get(Calendar.YEAR));
             vars.put("title", routeResult.page.getName());
-            vars.put("username", Page.getUser(req).getUsername());
+            vars.put("username", Page.getUser(req) != null ? Page.getUser(req)
+                    .getUsername() : null);
             mainTemplate.output(resp.getWriter(), vars);
         } else {
             routeDo(routeResult.page, req, resp, vars, routeResult.matcher,
