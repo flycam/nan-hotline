@@ -2,10 +2,12 @@
 <h2><?=$case_title?></h2>
 <h3>Case info</h3>
 <table class="table">
-<tr><th>Supporter</th><td><?=$case_supporter?></td></tr>
-<tr><th>Phone path</th><td><?=$case_path?></td></tr>
+<tr><th>Assigned supporter</th><td><?=$case_supporter?></td></tr>
 <tr><th>Description</th><td><?=$case_description?></td></tr>
 </table>
 <h3>Timeline</h3>
 <table class="table">
+<? foreach($actions) { ?>
+<tr><?=$action?></tr>
+<? } ?>
 </table>

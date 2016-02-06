@@ -1,6 +1,5 @@
 package me.streib.janis.nanhotline.web.dbobjects;
 
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
@@ -23,7 +22,12 @@ public class WizardCall extends Action {
     }
 
     @Override
-    public Outputable output(PrintWriter out, Map<String, Object> vars) {
+    public Outputable output(Map<String, Object> vars) {
+        vars.put("path", path);
+        System.out.println(supporterPhone);
+        vars.put("supporter",
+                supporterPhone != null ? supporterPhone.getSipUri() : null);
+        vars.put("supportee", supporteeSIPURI);
         return getDefaultTemplate();
     }
 
