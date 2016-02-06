@@ -37,12 +37,19 @@
             class="active"
             <? } ?>><a href="/"><span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span> Dashboard</a></li>
 
-            <li
-            <? if($Profile) {?>
-            class="active"
-            <? } ?>><a href="/user"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> Profile</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
+            <li
+            <? if($Profile) {?>
+            class="active
+            <? } ?> dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>Logged in as '<?=$username?>' <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+            <li <? if($Profile) {?>
+            class="active"
+            <? } ?> ><a href="/user">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+            </ul>
+            </li>
            <li>
            <a href="https://github.com/janisstreib/nan-hotline"><img width="18px" height="auto" src="/static/img/icon-circlegithub.png" alt="nan-hotline auf GitHub"/></a>
            </li>

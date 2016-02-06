@@ -13,7 +13,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import me.streib.janis.nanhotline.web.pages.*;
+import me.streib.janis.nanhotline.web.pages.CaseInspect;
+import me.streib.janis.nanhotline.web.pages.LoginPage;
+import me.streib.janis.nanhotline.web.pages.MainPage;
+import me.streib.janis.nanhotline.web.pages.Page;
+import me.streib.janis.nanhotline.web.pages.PhonePage;
+import me.streib.janis.nanhotline.web.pages.UserPage;
 
 import org.cacert.gigi.output.template.Outputable;
 import org.cacert.gigi.output.template.Template;
@@ -108,7 +113,8 @@ public class NANHotline extends HttpServlet {
                 @Override
                 public void output(PrintWriter out, Map<String, Object> vars) {
                     try {
-                        routeDo(routeResult.page, req, resp, vars, routeResult.matcher, method);
+                        routeDo(routeResult.page, req, resp, vars,
+                                routeResult.matcher, method);
                     } catch (IOException | SQLException e) {
                         e.printStackTrace();
                     }
@@ -118,15 +124,17 @@ public class NANHotline extends HttpServlet {
             vars.put("content", content);
             vars.put("year", Calendar.getInstance().get(Calendar.YEAR));
             vars.put("title", routeResult.page.getName());
+            vars.put("username", Page.getUser(req).getUsername());
             mainTemplate.output(resp.getWriter(), vars);
         } else {
-            routeDo(routeResult.page, req, resp, vars, routeResult.matcher, method);
+            routeDo(routeResult.page, req, resp, vars, routeResult.matcher,
+                    method);
         }
     }
 
     private void routeDo(Page p, HttpServletRequest req,
-            HttpServletResponse resp, Map<String, Object> vars, Matcher match, Method method)
-            throws IOException, SQLException {
+            HttpServletResponse resp, Map<String, Object> vars, Matcher match,
+            Method method) throws IOException, SQLException {
         switch (method) {
         case GET:
             p.doGet(req, resp, vars, match);
