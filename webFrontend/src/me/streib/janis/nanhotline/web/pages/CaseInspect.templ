@@ -1,4 +1,4 @@
-<h1>Case #<?=$case_id?></h1>
+<h1>Case #<?=$case_id?> <span class="label label-<? if($open) { ?>danger<? } else { ?>success<? } ?>"><? if($open) { ?>Open<? } else { ?>Closed<? } ?></span></h1>
 <h2><?=$case_title?></h2>
 <h3>Case info</h3>
 <table class="table">

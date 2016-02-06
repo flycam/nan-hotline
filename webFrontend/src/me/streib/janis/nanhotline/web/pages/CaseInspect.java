@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import me.streib.janis.nanhotline.web.dbobjects.Action;
 import me.streib.janis.nanhotline.web.dbobjects.Case;
+import me.streib.janis.nanhotline.web.dbobjects.Status;
 import me.streib.janis.nanhotline.web.dbobjects.Supporter;
 
 import org.cacert.gigi.output.template.IterableDataset;
@@ -34,6 +35,7 @@ public class CaseInspect extends Page {
             return;
         }
         vars.put("case_id", c.getId());
+        vars.put("open", c.getStatus() == Status.OPEN);
         vars.put("case_tite", c.getTitle());
         Supporter supp = c.getAssignedSupporter();
         if (supp != null) {
