@@ -2,6 +2,7 @@ package me.streib.janis.nanhotline.web.pages;
 
 import me.streib.janis.nanhotline.web.dbobjects.Phone;
 import me.streib.janis.nanhotline.web.dbobjects.Supporter;
+import org.cacert.gigi.output.template.Form;
 import org.cacert.gigi.output.template.IterableDataset;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ public class UserPage extends Page {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+        vars.put("userform", new UserForm(req));
         Supporter user = getUser(req);
         vars.put("username", user.getUsername());
         vars.put("fullname", user.getName());
@@ -41,6 +43,17 @@ public class UserPage extends Page {
             }
         });
         getDefaultTemplate().output(resp.getWriter(), vars);
+    }
+
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse resp, Map<String, Object> vars, Matcher match) throws IOException, SQLException {
+        UserForm form = Form.getForm(req, UserForm.class);
+        if (!form.submit(resp.getWriter(), req)) {
+            resp.getWriter().println("Could not save changes");
+            doGet(req, resp, vars, match);
+        } else {
+            resp.sendRedirect("/user");
+        }
     }
 
     @Override

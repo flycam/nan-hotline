@@ -37,19 +37,23 @@ public class Supporter {
         PreparedStatement prep = DatabaseConnection.getInstance().prepare(
                 "SELECT * FROM supporters WHERE username=? AND password=?");
         prep.setString(1, username);
+        String byteArrayToHexString = hashPassword(password);
+        prep.setString(2, byteArrayToHexString);
+        try (ResultSet res = prep.executeQuery()) {
+            if (res.next()) {
+                Supporter s = new Supporter(res);
+                res.close();
+                return s;
+            }
+        }
+        return null;
+    }
+
+    private static String hashPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
         messageDigest.update(password.getBytes("UTF-8"));
-        String byteArrayToHexString = byteArrayToHexString(messageDigest
+        return byteArrayToHexString(messageDigest
                 .digest());
-        prep.setString(2, byteArrayToHexString);
-        ResultSet res = prep.executeQuery();
-        if (res.next()) {
-            Supporter s = new Supporter(res);
-            res.close();
-            return s;
-        }
-        res.close();
-        return null;
     }
 
     private String name;
@@ -60,6 +64,25 @@ public class Supporter {
         this.name = res.getString("name");
         this.username = res.getString("username");
         this.id = res.getInt("id");
+    }
+
+    public void update() throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance()
+                .prepare("UPDATE supporters SET (username, name) = (?, ?) WHERE id=?");
+        prep.setString(1, username);
+        prep.setString(2, name);
+        prep.setInt(3, id);
+        prep.execute();
+    }
+
+    public boolean updatePassword(String oldPass, String newPass) throws SQLException, UnsupportedEncodingException, NoSuchAlgorithmException {
+        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
+                "UPDATE supporters SET password=? WHERE id=? AND password=?");
+        prep.setString(1, hashPassword(newPass));
+        prep.setInt(2, id);
+        prep.setString(3, hashPassword(oldPass));
+        int updateCount = prep.executeUpdate();
+        return updateCount != 0;
     }
 
     private static String byteArrayToHexString(byte[] b) {
@@ -109,5 +132,13 @@ public class Supporter {
 
     public int getId() {
         return id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
