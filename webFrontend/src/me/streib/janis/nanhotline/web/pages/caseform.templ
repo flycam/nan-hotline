@@ -10,7 +10,7 @@
         <td>
             <select class="form-control" id="assigned-supporter" name="assigned-supporter">
                 <? foreach($available_supporters) {?>
-                <option value="<?=$available_supporter_id?>" selected="<?=$available_supporter_active?>"><?=$available_supporter_name?></option>
+                <option value="<?=$available_supporter_id?>" <? if($available_supporter_active) { ?>selected="selected" <? } ?>><?=$available_supporter_name?></option>
                 <? } ?>
                 <option value="0" <? if($no_supporter_assigned) { ?> selected="true" <? } ?>>Nobody</option>
             </select>
