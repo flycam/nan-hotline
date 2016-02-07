@@ -3,6 +3,7 @@ package me.streib.janis.nanhotline.web.pages;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
@@ -53,11 +54,29 @@ public class CaseInspect extends Page {
         vars.put("case_id", c.getId());
         vars.put("open", c.getStatus() == Status.OPEN);
         vars.put("case_title", c.getTitle());
-        Supporter supp = c.getAssignedSupporter();
+        final Supporter supp = c.getAssignedSupporter();
         if (supp != null) {
             vars.put("case_supporter", supp.getName());
+        } else {
+            vars.put("no_supporter_assigned", true);
         }
         vars.put("description", c.getDescription());
+
+        final LinkedList<Supporter> availSupporters = Supporter.getAllSupporters();
+        vars.put("available_supporters", new IterableDataset() {
+            @Override
+            public boolean next(Map<String, Object> vars) {
+                if (availSupporters.isEmpty()) {
+                    return false;
+                }
+                Supporter s = availSupporters.removeFirst();
+                vars.put("available_supporter_id", s.getId());
+                vars.put("available_supporter_name", s.getName());
+                vars.put("available_supporter_active", supp != null && s.getId() == supp.getId());
+                return true;
+            }
+        });
+
         final LinkedList<Action> actions = Action.getByCase(c);
         vars.put("actions", new IterableDataset() {
 

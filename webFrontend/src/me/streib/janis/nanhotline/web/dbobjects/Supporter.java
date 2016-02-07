@@ -31,6 +31,18 @@ public class Supporter {
         return s;
     }
 
+    public static LinkedList<Supporter> getAllSupporters() throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
+                "SELECT * FROM supporters");
+        LinkedList<Supporter> supporters = new LinkedList<>();
+        try (ResultSet res = prep.executeQuery()) {
+            while(res.next()) {
+                supporters.add(new Supporter(res));
+            }
+        }
+        return supporters;
+    }
+
     public static Supporter isSupporter(String username, String password)
             throws SQLException, NoSuchAlgorithmException,
             UnsupportedEncodingException {

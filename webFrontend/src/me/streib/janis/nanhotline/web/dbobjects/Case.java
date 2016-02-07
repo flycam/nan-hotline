@@ -3,6 +3,7 @@ package me.streib.janis.nanhotline.web.dbobjects;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.LinkedList;
 
 import me.streib.janis.nanhotline.web.DatabaseConnection;
@@ -75,7 +76,11 @@ public class Case {
     public boolean assign(Supporter user) throws SQLException {
         PreparedStatement prep = DatabaseConnection.getInstance().prepare(
                 "UPDATE cases SET assigned_supporter = ? WHERE id=?");
-        prep.setInt(1, user.getId());
+        if (user == null) {
+            prep.setNull(1, Types.INTEGER);
+        } else {
+            prep.setInt(1, user.getId());
+        }
         prep.setInt(2, id);
         int updateCount = prep.executeUpdate();
         if (updateCount == 0) {

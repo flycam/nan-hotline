@@ -1,11 +1,21 @@
-<h2>
-    <div class="form-inline">
-    <label for="title">Title: </label><input class="form-control" type="text" id="title" name="title" value="<?=$case_title?>" />
-    </div>
+<h2 xmlns="http://www.w3.org/1999/html">
+    <span class="form-inline">
+        <label for="title">Title: </label><input class="form-control" type="text" id="title" name="title" value="<?=$case_title?>" />
+    </span>
 </h2>
 <h3>Case info</h3>
 <table class="table">
-    <tr><th>Assigned supporter</th><td><?=$case_supporter?></td></tr>
+    <tr>
+        <th><label for="assigned-supporter">Assigned supporter</label></th>
+        <td>
+            <select class="form-control" id="assigned-supporter" name="assigned-supporter">
+                <? foreach($available_supporters) {?>
+                <option value="<?=$available_supporter_id?>" selected="<?=$available_supporter_active?>"><?=$available_supporter_name?></option>
+                <? } ?>
+                <option value="0" <? if($no_supporter_assigned) { ?> selected="true" <? } ?>>Nobody</option>
+            </select>
+        </td>
+    </tr>
     <tr><th><label for="description">Description</label></th><td><input class="form-control" type="text" id="description" name="description" value="<?=$description?>" /></td></tr>
 </table>
 <button type="submit" class="btn btn-default">Update</button>

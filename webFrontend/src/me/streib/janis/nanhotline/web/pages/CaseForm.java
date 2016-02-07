@@ -1,6 +1,7 @@
 package me.streib.janis.nanhotline.web.pages;
 
 import me.streib.janis.nanhotline.web.dbobjects.Case;
+import me.streib.janis.nanhotline.web.dbobjects.Supporter;
 import org.cacert.gigi.output.template.Form;
 import org.cacert.gigi.output.template.Template;
 
@@ -30,11 +31,23 @@ public class CaseForm extends Form {
         caze.setTitle(req.getParameter("title"));
         caze.setDescription(req.getParameter("description"));
         try {
-            return caze.update();
+            caze.update();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
+        int assignId = Integer.parseInt(req.getParameter("assigned-supporter"));
+        try {
+            if (assignId == 0) {
+                caze.assign(null);
+            } else {
+                caze.assign(Supporter.getSupporterById(assignId));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
