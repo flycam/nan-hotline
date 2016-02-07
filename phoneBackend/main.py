@@ -8,6 +8,7 @@ from telegram import TelegramComm
 from config import *
 from conversation import Conversation
 from supporting import SupporterManager
+import control_socket
 
 
 def log_cb(level, str, len):
@@ -53,7 +54,7 @@ try:
     acc_cb = MyAccountCallback(acc)
     acc.set_callback(acc_cb)
     acc_cb.wait()
-
+    control_socket.ControlSocket(acc)
     print "\n"
     print "Registration complete, status=", acc.info().reg_status, \
         "(" + acc.info().reg_reason + ")"
