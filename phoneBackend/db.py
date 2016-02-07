@@ -13,6 +13,18 @@ class SupporterPhone(object):
         self.supporter = None
 
     @classmethod
+    def get_by_id(cls, id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, sip_uri, supporter FROM supporter_phones WHERE id = %s;", (id,))
+        res = cursor.fetchone()
+        p = SupporterPhone()
+        p.id = res[0]
+        p.sip_uri = res[1]
+        p.supporter = Supporter.get_by_id(res[2])
+        return p
+
+    @classmethod
     def get_by_supporter(cls, supporter):
         supp_id = supporter.id
         conn = get_db_connection()
@@ -37,6 +49,19 @@ class Supporter(object):
         self.name = None
         self.telegram_id = None
         self.phones = None
+
+    @classmethod
+    def get_by_id(cls, id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, telegram_id FROM supporters;")
+        s = cursor.fetchone()
+        supp = Supporter()
+        supp.id = s[0]
+        supp.name = s[1]
+        supp.telegram_id = s[2]
+        supp.phones = SupporterPhone.get_by_supporter(supp)
+        return supp
 
     @classmethod
     def get_all(cls):
