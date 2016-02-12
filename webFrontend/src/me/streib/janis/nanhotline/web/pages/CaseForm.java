@@ -1,6 +1,7 @@
 package me.streib.janis.nanhotline.web.pages;
 
 import me.streib.janis.nanhotline.web.dbobjects.Case;
+import me.streib.janis.nanhotline.web.dbobjects.Status;
 import me.streib.janis.nanhotline.web.dbobjects.Supporter;
 import org.cacert.gigi.output.template.Form;
 import org.cacert.gigi.output.template.Template;
@@ -30,6 +31,7 @@ public class CaseForm extends Form {
     public boolean submit(PrintWriter out, HttpServletRequest req) {
         caze.setTitle(req.getParameter("title"));
         caze.setDescription(req.getParameter("description"));
+        caze.setStatus(req.getParameter("status").equals("open")? Status.OPEN : Status.CLOSED);
         try {
             caze.update();
         } catch (SQLException e) {

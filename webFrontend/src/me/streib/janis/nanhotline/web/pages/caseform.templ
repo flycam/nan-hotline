@@ -6,6 +6,15 @@
 <h3>Case info</h3>
 <table class="table">
     <tr>
+        <th><label for="case-status">Case status</label></th>
+        <td>
+            <select class="form-control" id="case-status" name="status">
+                <option value="open" <? if($open) { ?> selected="true" <? } ?> >open</option>
+                <option value="closed" <? if($open) { ?><? } else { ?> selected="true" <? } ?> >closed</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
         <th><label for="assigned-supporter">Assigned supporter</label></th>
         <td>
             <select class="form-control" id="assigned-supporter" name="assigned-supporter">
