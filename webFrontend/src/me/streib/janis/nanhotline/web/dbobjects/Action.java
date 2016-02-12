@@ -17,6 +17,7 @@ import org.eclipse.jetty.util.log.Log;
 public abstract class Action {
     private Date date;
     private Template defaultTemplate;
+    private int id;
 
     public static LinkedList<Action> getByCase(Case c) throws SQLException {
         LinkedList<Action> result = new LinkedList<Action>();
@@ -61,6 +62,7 @@ public abstract class Action {
     }
 
     public Action(ResultSet res) throws SQLException {
+        this.id = res.getInt("id");
         this.date = new Date(res.getLong("epoch"));
         URL resource = getClass().getResource(
                 getClass().getSimpleName() + ".templ");
@@ -77,6 +79,10 @@ public abstract class Action {
 
     protected Template getDefaultTemplate() {
         return defaultTemplate;
+    }
+
+    public int getId() {
+        return id;
     }
 
 }
