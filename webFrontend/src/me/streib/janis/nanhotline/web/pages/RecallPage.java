@@ -27,7 +27,7 @@ public class RecallPage extends Page {
         WizardCall a = (WizardCall) Action.getById(Integer.parseInt(match
                 .group("id")));
         HttpURLConnection control = (HttpURLConnection) new URL(
-                "http://172.19.79.49:9000/proxy").openConnection();
+                "http://localhost:9000/proxy").openConnection();
         control.setRequestMethod("POST");
         control.setDoOutput(true);
         OutputStream o = control.getOutputStream();
