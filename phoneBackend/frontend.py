@@ -1,6 +1,5 @@
 class Frontend(object):
-    def __init__(self, supporters, supporter_available_callback, supporter_declined_callback):
-        self.supporters = supporters
+    def __init__(self, supporter_available_callback, supporter_declined_callback):
         self.supporter_available_callback = supporter_available_callback
         self.supporter_declined_callback = supporter_declined_callback
 

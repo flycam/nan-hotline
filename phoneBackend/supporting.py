@@ -15,15 +15,14 @@ class SupportRequest(object):
 
 class SupporterManager(object):
     def __init__(self):
-        self.supporters = db.Supporter.get_all()
         self.frontends = [
-            telegram.TelegramFrontend(self.supporters, self.__supporter_accepted_cb, self.__supporter_declined_cb)]
+            telegram.TelegramFrontend(self.__supporter_accepted_cb, self.__supporter_declined_cb)]
 
         self.requests = []
 
     def get_available_supporter(self, supporter_available_callback, conversation):
         request = SupportRequest(supporter_available_callback, conversation, str(conversation.get_id()),
-                                 self.supporters)
+                                 db.Supporter.get_all())
         self.requests.append(request)
         for frontend in self.frontends:
             frontend.get_available_supporter(conversation)

@@ -8,12 +8,13 @@ import urllib
 from frontend import Frontend
 import serverconfig
 import re
+import db
 
 
 class TelegramComm(object):
     TELEGRAM_API_URL = "https://api.telegram.org/bot{}/"
 
-    def __init__(self, url, localPort, botToken, userList):
+    def __init__(self, url, localPort, botToken):
         class TelegramWebhookHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
             def do_POST(s):
@@ -23,6 +24,7 @@ class TelegramComm(object):
                 requ = json.loads(requ)
                 s.send_response(200)
                 message = requ['message']
+                userList = self.get_user_list()
                 if message['text'] == "/botsnack":
                     self.sendRequest("sendMessage",
                                      {'chat_id': message['chat']['id'], 'text': '*knirps* *knirps* Yummy! Thank you!'})
@@ -62,7 +64,6 @@ class TelegramComm(object):
 
         self.talkCallback = None
         self.api_url = self.TELEGRAM_API_URL.format(botToken)
-        self.userList = userList
 
         class MyTCPSocketServer(SocketServer.TCPServer):
             allow_reuse_address = True
@@ -83,7 +84,7 @@ class TelegramComm(object):
             keyboardMarkup = {"hide_keyboard": True}
         if callback is not None:
             self.talkCallback = callback
-        for user in self.userList:
+        for user in self.get_user_list():
             self.sendRequest("sendMessage",
                              {'chat_id': str(user), 'text': message, 'reply_markup': keyboardMarkup})
 
@@ -98,18 +99,21 @@ class TelegramComm(object):
     def close(self):
         self.server.shutdown()
 
-
-class TelegramFrontend(Frontend):
-    def __init__(self, supporters, supporter_available_callback, supporter_declined_cb):
-        super(TelegramFrontend, self).__init__(supporters, supporter_available_callback, supporter_declined_cb)
+    def get_user_list(self):
+        supporters = db.Supporter.get_all()
         user_list = {}
         for s in supporters:
             user_list[s.telegram_id] = s
-        self.telegram = TelegramComm("https://nan.uni-karlsruhe.de/janis", 8080, serverconfig.telegram_token,
-                                     user_list)
+        return user_list
+
+
+class TelegramFrontend(Frontend):
+    def __init__(self, supporter_available_callback, supporter_declined_cb):
+        super(TelegramFrontend, self).__init__(supporter_available_callback, supporter_declined_cb)
+        self.telegram = TelegramComm("https://nan.uni-karlsruhe.de/janis", 8080, serverconfig.telegram_token)
 
     def get_available_supporter(self, conversation):
-        for supporter in self.supporters:
+        for supporter in db.Supporter.get_all():
             accept_commands = ["/accept_{}_{} <{}>".format(conversation.get_id(), p.id, p.sip_uri) for p in
                                supporter.phones]
 
@@ -138,7 +142,7 @@ class TelegramFrontend(Frontend):
 
     def __broadcast_callback(self, from_telegram_user, text):
         selected_supporter = None
-        for supporter in self.supporters:
+        for supporter in db.Supporter.get_all():
             if supporter.telegram_id == from_telegram_user:
                 selected_supporter = supporter
         if selected_supporter is None:
