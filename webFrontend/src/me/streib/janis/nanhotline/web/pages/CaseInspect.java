@@ -3,7 +3,6 @@ package me.streib.janis.nanhotline.web.pages;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
@@ -62,7 +61,8 @@ public class CaseInspect extends Page {
         }
         vars.put("description", c.getDescription());
 
-        final LinkedList<Supporter> availSupporters = Supporter.getAllSupporters();
+        final LinkedList<Supporter> availSupporters = Supporter
+                .getAllSupporters();
         vars.put("available_supporters", new IterableDataset() {
             @Override
             public boolean next(Map<String, Object> vars) {
@@ -72,7 +72,8 @@ public class CaseInspect extends Page {
                 Supporter s = availSupporters.removeFirst();
                 vars.put("available_supporter_id", s.getId());
                 vars.put("available_supporter_name", s.getName());
-                vars.put("available_supporter_active", supp != null && s.getId() == supp.getId());
+                vars.put("available_supporter_active",
+                        supp != null && s.getId() == supp.getId());
                 return true;
             }
         });
@@ -86,7 +87,12 @@ public class CaseInspect extends Page {
                     return false;
                 }
                 Action a = actions.removeFirst();
-                vars.put("action", a.output(vars));
+                try {
+                    vars.put("action", a.output(vars, Page.getUser(req)));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
                 return true;
             }
         });

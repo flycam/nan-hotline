@@ -20,7 +20,7 @@ public class CommentAction extends Action {
     }
 
     @Override
-    public Outputable output(Map<String, Object> vars) {
+    public Outputable output(Map<String, Object> vars, Supporter user) {
         vars.put("comment", commentText);
         vars.put("time", Page.DE_FROMAT_DATE.format(getTime()));
         vars.put("supporter", supp.getName());

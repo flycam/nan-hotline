@@ -3,4 +3,14 @@
 <? } ?></td>
 <td><?=$time?></td>
 <th>Wizard call by <?=$supportee?>.<? if($supporter) { ?> Accepted by <?=$supporter?> <? } else { ?> Declined. <? } ?></th>
-<td>Path: <?=$path?></td>
+<td>Path: <?=$path?></td><td>
+<div class="btn-group"><button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true">
+</span><span class="glyphicon glyphicon-earphone" aria-hidden="true"></span> <span class="caret"></span></button>
+<ul class="dropdown-menu">
+    <? foreach($supp_phones) { ?>
+    <li><a href="/action/<?=$action_id?>/recall?phone=<?=$supp_phone_id?>"><?=$supp_phone?></a></li>
+    <? } ?>
+    <li role="separator" class="divider"></li>
+    <li><a href="/user">Edit phones</a></li>
+  </ul></div></td>
+  

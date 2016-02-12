@@ -20,8 +20,10 @@ public abstract class Action {
     private int id, caseId;
 
     public static Action getById(int id) throws SQLException {
-        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
-                "SELECT * FROM actions WHERE id=?");
+        PreparedStatement prep = DatabaseConnection
+                .getInstance()
+                .prepare(
+                        "SELECT p.relname, a.* FROM actions a, pg_class p WHERE id=? AND a.tableoid = p.oid");
         prep.setInt(1, id);
         try (ResultSet res = prep.executeQuery()) {
             if (res.next()) {
@@ -90,7 +92,8 @@ public abstract class Action {
         return date;
     }
 
-    public abstract Outputable output(Map<String, Object> vars);
+    public abstract Outputable output(Map<String, Object> vars, Supporter user)
+            throws SQLException;
 
     protected Template getDefaultTemplate() {
         return defaultTemplate;

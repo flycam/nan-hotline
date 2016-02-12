@@ -18,6 +18,7 @@ import me.streib.janis.nanhotline.web.pages.LoginPage;
 import me.streib.janis.nanhotline.web.pages.MainPage;
 import me.streib.janis.nanhotline.web.pages.Page;
 import me.streib.janis.nanhotline.web.pages.PhonePage;
+import me.streib.janis.nanhotline.web.pages.RecallPage;
 import me.streib.janis.nanhotline.web.pages.UserPage;
 
 import org.cacert.gigi.output.template.Outputable;
@@ -41,6 +42,7 @@ public class NANHotline extends HttpServlet {
         pageRouter.addPage("^/case/(?<id>[0-9]*)(?:/(?<action>.*))?$", new CaseInspect());
         pageRouter.addPage("^/user/?$", new UserPage());
         pageRouter.addPage("^/telephone/(.*)$", new PhonePage());
+        pageRouter.addPage("^/action/(?<id>[0-9]+)/recall", new RecallPage());
     }
 
     @Override
