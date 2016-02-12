@@ -54,7 +54,7 @@ try:
     acc_cb = MyAccountCallback(acc)
     acc.set_callback(acc_cb)
     acc_cb.wait()
-    control_socket.ControlSocket(acc)
+    control_sock = control_socket.ControlSocket(acc, lib)
     print "\n"
     print "Registration complete, status=", acc.info().reg_status, \
         "(" + acc.info().reg_reason + ")"
@@ -63,6 +63,7 @@ try:
 
     lib.destroy()
     supp_man.close()
+    control_sock.close()
     lib = None
 
 except pj.Error, e:

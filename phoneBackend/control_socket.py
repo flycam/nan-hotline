@@ -1,7 +1,5 @@
 import SimpleHTTPServer
 import SocketServer
-import threading
-from distutils.command.config import config
 
 import db
 import threading
@@ -10,9 +8,10 @@ import _pjsua
 
 
 class ControlSocket(object):
-    def __init__(self, account):
+    def __init__(self, account, lib):
         self.account = account
         control_socket = self
+        self.lib = lib
 
         class ControlHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             def do_POST(self):
@@ -48,7 +47,7 @@ class ControlSocket(object):
                 class ProxyCCB(pj.CallCallback):
                     def __init__(self, call, queue_callback):
                         pj.CallCallback.__init__(self, call)
-                        self.queue_callback = queue_callback
+                        self.supporter_ccb = queue_callback
 
                     # Notification when call state has changed
                     def on_state(self):
@@ -59,8 +58,8 @@ class ControlSocket(object):
 
                         if self.call.info().state == pj.CallState.DISCONNECTED:
                             try:
-                                if self.queue_callback.call.info().state == pj.CallState.CONFIRMED:
-                                    self.queue_callback.call.hangup()
+                                if self.supporter_ccb.call.info().state == pj.CallState.CONFIRMED:
+                                    self.supporter_ccb.call.hangup()
                             except pj.Error as e:
                                 print(e)
                             except ReferenceError as e:
@@ -77,13 +76,15 @@ class ControlSocket(object):
 
                     def proceed(self):
                         if self.call.info().state == pj.CallState.CONFIRMED and self.call.info().media_state == pj.MediaState.ACTIVE:
-                            #self.queue_callback.stop_music()
-                            self.call.transfer_to_call(self.queue_callback.call)
+                            self.supporter_ccb.stop_players()
+                            self.call.transfer_to_call(self.supporter_ccb.call)
 
                 class SupporterCCB(pj.CallCallback):
                     def __init__(self, call):
                         pj.CallCallback.__init__(self, call)
                         self.proxy_call = None
+                        self.speech_player_id = None
+                        self.music_player_id = None
 
                     # Notification when call state has changed
                     def on_state(self):
@@ -112,6 +113,15 @@ class ControlSocket(object):
 
                     def proceed(self):
                         if self.call.info().state == pj.CallState.CONFIRMED and self.call.info().media_state == pj.MediaState.ACTIVE:
+
+                            #self.speech_player_id = lib.create_player("sounds/connecting.wav")
+                            #lib.conf_connect(lib.player_get_slot(self.speech_player_id), self.call.info().conf_slot)
+
+
+                            # self.music_player_id = lib.create_player("sounds/pausenmusik.wav", loop=True)
+                            # lib.conf_connect(lib.player_get_slot(self.music_player_id), self.call.info().conf_slot)
+                            # lib.conf_set_rx_level(lib.player_get_slot(self.music_player_id), 0.1)
+
                             def async():
                                 try:
                                     thread_desc = 0;
@@ -127,6 +137,14 @@ class ControlSocket(object):
 
                             threading.Thread(target=async).start()
 
+                    def stop_players(self):
+                        if self.music_player_id is not None:
+                            lib.conf_disconnect(lib.player_get_slot(self.music_player_id), self.call.info().conf_slot)
+                            lib.player_destroy(self.music_player_id)
+                        if self.speech_player_id is not None:
+                            lib.conf_disconnect(lib.player_get_slot(self.speech_player_id), self.call.info().conf_slot)
+                            lib.player_destroy(self.speech_player_id)
+
                 def async():
                     try:
                         thread_desc = 0;
@@ -140,3 +158,6 @@ class ControlSocket(object):
                         print "Error: " + str(e)
 
                 threading.Thread(target=async).start()
+
+    def close(self):
+        self.server.shutdown()

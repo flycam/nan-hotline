@@ -91,10 +91,35 @@ def get_db_connection():
     return connection
 
 
-def create_conversation(supporter_phone, sip_uri, path):
+def create_conversation(sip_uri, path):
+    '''
+    Create a new conversation
+    :param sip_uri: caller sip uri
+    :param path: wizard path
+    :return: (case_id, call_id)
+    '''
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    cursor.execute("INSERT INTO cases DEFAULT VALUES RETURNING id;")
+    case_id = cursor.fetchone()[0]
+    print("Created case with id {}".format(case_id))
+    cursor.execute(
+        """
+        INSERT INTO wizard_calls ("case", "time", path, supportee_sip_uri)
+        VALUES (%s, now(), %s, %s)
+        RETURNING id;
+        """,
+        (case_id, path, sip_uri)
+    )
+    call_id = cursor.fetchone()[0]
+    print("Created call with id {}".format(call_id))
+    conn.commit()
+
+    return case_id, call_id
+
+
+def set_conversation_supporter(case_id, call_id, supporter_phone):
     if supporter_phone is not None:
         assigned_supporter_id = supporter_phone.supporter.id
         supporter_phone_id = supporter_phone.id
@@ -102,22 +127,17 @@ def create_conversation(supporter_phone, sip_uri, path):
         assigned_supporter_id = None
         supporter_phone_id = None
 
-    cursor.execute("INSERT INTO cases (assigned_supporter) VALUES (%s) RETURNING id;", (assigned_supporter_id,))
-    case_id = cursor.fetchone()[0]
-    print("Created case with id {}".format(case_id))
-    cursor.execute(
-        """
-        INSERT INTO wizard_calls ("case", "time", path, supportee_sip_uri, supporter_phone)
-        VALUES (%s, now(), %s, %s, %s)
-        RETURNING id;
-        """,
-        (case_id, path, sip_uri, supporter_phone_id)
-    )
-    call_id = cursor.fetchone()[0]
-    print("Created call with id {}".format(call_id))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    print("Assigning supporter {} to case {} and call {}".format(assigned_supporter_id, case_id, call_id))
+
+    cursor.execute("UPDATE cases SET (assigned_supporter) = (%s) WHERE id=%s;", (assigned_supporter_id, case_id))
+    cursor.execute("UPDATE wizard_calls SET (supporter_phone) = (%s) WHERE id=%s;", (supporter_phone_id, call_id))
     conn.commit()
+
 
 if __name__ == "__main__":
     sp = SupporterPhone()
     sp.id = 1
-    create_conversation(None, "not really a sip uri", "1->2")
+    create_conversation("not really a sip uri", "1->2")

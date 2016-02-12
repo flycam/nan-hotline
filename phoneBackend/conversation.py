@@ -116,6 +116,7 @@ class Conversation(object):
 
                     if conv.current_node.id == -1:
                         print("Technischer Mitarbeiter")
+                        conv.case_id, conv.call_id = db.create_conversation(self.call.info().remote_uri, "->".join([n.description for n in conv.path]))
                         conv.supporter_manager.get_available_supporter(self.avail_callback, conv)
 
                         sleep(5)
@@ -141,8 +142,8 @@ class Conversation(object):
                     thread_desc = 0;
                     err = _pjsua.thread_register("python worker callback timeout "+ str(conv.get_id()), thread_desc)
                     print "AVAIL called by supporter phone {}".format(supporter_phone)
-                    db.create_conversation(supporter_phone, self.call.info().remote_uri, "->".join([n.description for n in conv.path]))
                     if supporter_phone is not None:
+                        db.set_conversation_supporter(conv.case_id, conv.call_id, supporter_phone)
                         self.make_call(supporter_phone.sip_uri)
                     else:
                         conv.current_node = conv.conversation_graph.getNodeById(-2)
@@ -175,6 +176,8 @@ class Conversation(object):
         self.lib = lib
         self.id = random.randint(0, 500000)
         self.supporter_manager = supporter_manager
+        self.case_id = None
+        self.call_id = None
         queue_call.set_callback(QueueCallback(queue_call))
         queue_call.answer(200, "Call accepted by bot.")
 
