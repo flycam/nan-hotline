@@ -17,7 +17,7 @@ import org.eclipse.jetty.util.log.Log;
 public abstract class Action {
     private Date date;
     private Template defaultTemplate;
-    private int id;
+    private int id, caseId;
 
     public static Action getById(int id) throws SQLException {
         PreparedStatement prep = DatabaseConnection.getInstance().prepare(
@@ -77,6 +77,7 @@ public abstract class Action {
 
     public Action(ResultSet res) throws SQLException {
         this.id = res.getInt("id");
+        this.caseId = res.getInt("case");
         this.date = new Date(res.getLong("epoch"));
         URL resource = getClass().getResource(
                 getClass().getSimpleName() + ".templ");
@@ -97,6 +98,10 @@ public abstract class Action {
 
     public int getId() {
         return id;
+    }
+
+    public int getCaseId() {
+        return caseId;
     }
 
 }
