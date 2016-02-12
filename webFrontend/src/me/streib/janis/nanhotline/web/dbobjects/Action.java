@@ -19,6 +19,18 @@ public abstract class Action {
     private Template defaultTemplate;
     private int id;
 
+    public static Action getById(int id) throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
+                "SELECT * FROM actions WHERE id=?");
+        prep.setInt(1, id);
+        try (ResultSet res = prep.executeQuery()) {
+            if (res.next()) {
+                return genAction(res);
+            }
+        }
+        return null;
+    }
+
     public static LinkedList<Action> getByCase(Case c) throws SQLException {
         LinkedList<Action> result = new LinkedList<Action>();
         PreparedStatement prep = DatabaseConnection
@@ -28,37 +40,39 @@ public abstract class Action {
         prep.setInt(1, c.getId());
         try (ResultSet res = prep.executeQuery()) {
             while (res.next()) {
-                PreparedStatement fetch = DatabaseConnection.getInstance()
-                        .prepare(
-                                "SELECT a.*, extract(epoch from a.time)*1000 as epoch FROM "
-                                        + res.getString("relname")
-                                        + " a WHERE id=?");
-                fetch.setInt(1, res.getInt("id"));
-                System.out.println(res.getString("relname"));
-
-                switch (res.getString("relname")) {
-                case "wizard_calls":
-                    try (ResultSet spec = fetch.executeQuery()) {
-                        if (spec.next()) {
-                            result.add(new WizardCall(spec));
-                        }
-                    }
-                    break;
-                case "comments":
-                    try (ResultSet spec = fetch.executeQuery()) {
-                        if (spec.next()) {
-                            result.add(new CommentAction(spec));
-                        }
-                    }
-                    break;
-                default:
-                    Log.getLog().warn("Unknown action",
-                            res.getString("tableoid"));
-                    break;
-                }
+                result.add(genAction(res));
             }
         }
         return result;
+    }
+
+    private static Action genAction(ResultSet res) throws SQLException {
+        PreparedStatement fetch = DatabaseConnection.getInstance().prepare(
+                "SELECT a.*, extract(epoch from a.time)*1000 as epoch FROM "
+                        + res.getString("relname") + " a WHERE id=?");
+        fetch.setInt(1, res.getInt("id"));
+        System.out.println(res.getString("relname"));
+
+        switch (res.getString("relname")) {
+        case "wizard_calls":
+            try (ResultSet spec = fetch.executeQuery()) {
+                if (spec.next()) {
+                    return new WizardCall(spec);
+                }
+            }
+            break;
+        case "comments":
+            try (ResultSet spec = fetch.executeQuery()) {
+                if (spec.next()) {
+                    return new CommentAction(spec);
+                }
+            }
+            break;
+        default:
+            Log.getLog().warn("Unknown action", res.getString("tableoid"));
+            break;
+        }
+        return null;
     }
 
     public Action(ResultSet res) throws SQLException {
