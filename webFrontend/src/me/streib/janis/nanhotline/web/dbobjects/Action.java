@@ -78,7 +78,7 @@ public abstract class Action {
             }
             break;
         default:
-            Log.getLog().warn("Unknown action", res.getString("tableoid"));
+            Log.getLog().warn("Unknown action", res.getString("relname"));
             break;
         }
         return null;
