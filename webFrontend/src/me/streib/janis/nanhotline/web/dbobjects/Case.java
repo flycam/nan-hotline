@@ -1,5 +1,6 @@
 package me.streib.janis.nanhotline.web.dbobjects;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -150,6 +151,15 @@ public class Case {
                 "DELETE FROM cases WHERE id=?");
         prep.setInt(1, getId());
         prep.execute();
+
+        prep = DatabaseConnection
+                .getInstance()
+                .prepare(
+                        "INSERT INTO merge_actions (time, \"case\", old_case) VALUES (?, ?, ?)");
+        prep.setDate(1, new Date(System.currentTimeMillis()));
+        prep.setInt(2, caseId);
+        prep.setInt(3, getId());
+        prep.executeQuery();
         return true;
     }
 }

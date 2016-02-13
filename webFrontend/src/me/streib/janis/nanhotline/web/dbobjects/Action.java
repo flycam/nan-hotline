@@ -77,6 +77,13 @@ public abstract class Action {
                 }
             }
             break;
+        case "merge_actions":
+            try (ResultSet spec = fetch.executeQuery()) {
+                if (spec.next()) {
+                    return new MergeAction(spec);
+                }
+            }
+            break;
         default:
             Log.getLog().warn("Unknown action", res.getString("relname"));
             break;
