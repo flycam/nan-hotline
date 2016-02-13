@@ -70,6 +70,13 @@ public abstract class Action {
                 }
             }
             break;
+        case "proxy_calls":
+            try (ResultSet spec = fetch.executeQuery()) {
+                if (spec.next()) {
+                    return new ProxyCall(spec);
+                }
+            }
+            break;
         default:
             Log.getLog().warn("Unknown action", res.getString("tableoid"));
             break;
