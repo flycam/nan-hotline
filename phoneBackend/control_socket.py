@@ -5,6 +5,7 @@ import db
 import threading
 import pjsua as pj
 import _pjsua
+import time
 
 
 class ControlSocket(object):
@@ -24,8 +25,9 @@ class ControlSocket(object):
                     supporter_phone = int(parts[1])
                     target_uri = parts[2]
                     ProxyCoversation(case, supporter_phone, target_uri)
-
-                self.send_response(200)
+                    self.send_response(200)
+                else:
+                    self.send_response(404)
 
             def do_GET(self):
                 self.send_response(200)
@@ -38,11 +40,12 @@ class ControlSocket(object):
 
         class ProxyCoversation(object):
 
-            def __init__(self, case, supporter_phone, target_uri):
-                self.supporter_phone = db.SupporterPhone.get_by_id(supporter_phone)
-                self.case = case
+            def __init__(self, case_id, supporter_phone_id, target_uri):
+                self.supporter_phone = db.SupporterPhone.get_by_id(supporter_phone_id)
+                self.case_id = case_id
                 self.target_uri = target_uri
                 proxy_conversation = self
+                self.proxy_call_id = None
 
                 class ProxyCCB(pj.CallCallback):
                     def __init__(self, call, queue_callback):
@@ -78,6 +81,10 @@ class ControlSocket(object):
                         if self.call.info().state == pj.CallState.CONFIRMED and self.call.info().media_state == pj.MediaState.ACTIVE:
                             self.supporter_ccb.stop_players()
                             self.call.transfer_to_call(self.supporter_ccb.call)
+                            if proxy_conversation.proxy_call_id is not None:
+                                db.set_proxy_call_accepted(proxy_conversation.proxy_call_id, True)
+                            else:
+                                print("WAT????")
 
                 class SupporterCCB(pj.CallCallback):
                     def __init__(self, call):
@@ -121,6 +128,8 @@ class ControlSocket(object):
                             # self.music_player_id = lib.create_player("sounds/pausenmusik.wav", loop=True)
                             # lib.conf_connect(lib.player_get_slot(self.music_player_id), self.call.info().conf_slot)
                             # lib.conf_set_rx_level(lib.player_get_slot(self.music_player_id), 0.1)
+
+                            proxy_conversation.proxy_call_id = db.create_proxy_call(case_id, proxy_conversation.target_uri, supporter_phone_id)
 
                             def async():
                                 try:

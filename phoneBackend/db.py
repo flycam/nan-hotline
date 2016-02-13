@@ -137,6 +137,39 @@ def set_conversation_supporter(case_id, call_id, supporter_phone):
     conn.commit()
 
 
+def create_proxy_call(case_id, target_sip_uri, supporter_phone_id):
+    '''
+    :param case_id:
+    :param target_sip_uri:
+    :return: call_id
+    '''
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO proxy_calls ("case", "time", target_sip_uri, supporter_phone)
+        VALUES (%s, now(), %s, %s)
+        RETURNING id;
+        """,
+        (case_id, target_sip_uri, supporter_phone_id)
+    )
+    call_id = cursor.fetchone()[0]
+    print("Created proxy call with id {}".format(call_id))
+    conn.commit()
+
+    return call_id
+
+
+def set_proxy_call_accepted(call_id, accepted):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    print("Setting proxy call {} accepted to {}".format(call_id, accepted))
+
+    cursor.execute("UPDATE proxy_calls SET (accepted) = (%s) WHERE id=%s;", (accepted, call_id))
+    conn.commit()
+
 if __name__ == "__main__":
     sp = SupporterPhone()
     sp.id = 1
