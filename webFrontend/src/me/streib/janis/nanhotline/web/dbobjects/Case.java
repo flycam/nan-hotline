@@ -149,7 +149,11 @@ public class Case {
                 .getInstance()
                 .prepare(
                         "UPDATE cases SET assigned_supporter=? WHERE id=? AND assigned_supporter IS NULL");
-        prep.setInt(1, assignedSupporter.getId());
+        if (assignedSupporter != null) {
+            prep.setInt(1, assignedSupporter.getId());
+        } else {
+            prep.setInt(1, 0);
+        }
         prep.setInt(2, caseId);
         prep.execute();
 
