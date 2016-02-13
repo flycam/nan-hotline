@@ -103,13 +103,53 @@ public class Case {
     }
 
     public boolean update() throws SQLException {
-        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
-                "UPDATE cases SET (title, description, status) = (?, ?, ?::case_status) WHERE id=?");
+        PreparedStatement prep = DatabaseConnection
+                .getInstance()
+                .prepare(
+                        "UPDATE cases SET (title, description, status) = (?, ?, ?::case_status) WHERE id=?");
         prep.setString(1, title);
         prep.setString(2, description);
         prep.setString(3, status.name().toLowerCase());
         prep.setInt(4, id);
         int updateCount = prep.executeUpdate();
         return updateCount != 0;
+    }
+
+    public boolean merge(int caseId) throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
+                "UPDATE actions SET \"case\"=? WHERE \"case\"=?");
+        prep.setInt(1, caseId);
+        prep.setInt(2, getId());
+        prep.execute();
+
+        prep = DatabaseConnection
+                .getInstance()
+                .prepare(
+                        "UPDATE cases SET title=? WHERE id=? AND (title ='') IS NOT FALSE");
+        prep.setString(1, title);
+        prep.setInt(2, caseId);
+        prep.execute();
+
+        prep = DatabaseConnection
+                .getInstance()
+                .prepare(
+                        "UPDATE cases SET assigned_supporter=? WHERE id=? AND assigned_supporter IS NULL");
+        prep.setInt(1, assignedSupporter.getId());
+        prep.setInt(2, caseId);
+        prep.execute();
+
+        prep = DatabaseConnection
+                .getInstance()
+                .prepare(
+                        "UPDATE cases SET description=? WHERE id=? AND (description ='') IS NOT FALSE");
+        prep.setString(1, description);
+        prep.setInt(2, caseId);
+        prep.execute();
+
+        prep = DatabaseConnection.getInstance().prepare(
+                "DELETE FROM cases WHERE id=?");
+        prep.setInt(1, getId());
+        prep.execute();
+        return true;
     }
 }

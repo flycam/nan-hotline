@@ -97,6 +97,7 @@ public class CaseInspect extends Page {
             }
         });
         vars.put("commentForm", new CommentForm(req, c));
+        vars.put("mergeform", new MergeForm(req, c));
         getDefaultTemplate().output(resp.getWriter(), vars);
     }
 
@@ -107,6 +108,12 @@ public class CaseInspect extends Page {
         if (req.getParameter("comment") != null) {
             Form m = Form.getForm(req, CommentForm.class);
             m.submit(resp.getWriter(), req);
+        } else if (req.getParameter("tomerge") != null) {
+            Form m = Form.getForm(req, MergeForm.class);
+            if (m.submit(resp.getWriter(), req)) {
+                resp.sendRedirect("/case/" + req.getParameter("tomerge"));
+            }
+
         } else {
             CaseForm form = Form.getForm(req, CaseForm.class);
             if (!form.submit(resp.getWriter(), req)) {
