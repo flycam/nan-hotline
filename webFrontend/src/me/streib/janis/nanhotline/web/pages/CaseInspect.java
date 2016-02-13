@@ -46,8 +46,18 @@ public class CaseInspect extends Page {
 
         Case c = Case.getCaseById(caseId);
         if (c == null) {
-            resp.sendError(404);
-            return;
+            //Check if case was merged
+            Integer mergedCaseId = Case.getMergedId(caseId);
+            if (mergedCaseId != null) {
+                vars.put("merged", true);
+                vars.put("merged_id", mergedCaseId);
+                vars.put("case_id", caseId);
+                getDefaultTemplate().output(resp.getWriter(), vars);
+                return;
+            } else {
+                resp.sendError(404);
+                return;
+            }
         }
         vars.put("caseform", new CaseForm(req, c));
         vars.put("case_id", c.getId());
@@ -78,6 +88,7 @@ public class CaseInspect extends Page {
             }
         });
 
+        final Supporter user = Page.getUser(req);
         final LinkedList<Action> actions = Action.getByCase(c);
         vars.put("actions", new IterableDataset() {
 
@@ -88,7 +99,7 @@ public class CaseInspect extends Page {
                 }
                 Action a = actions.removeFirst();
                 try {
-                    vars.put("action", a.output(vars, Page.getUser(req)));
+                    vars.put("action", a.output(vars, user));
                 } catch (SQLException e) {
                     e.printStackTrace();
                     return false;

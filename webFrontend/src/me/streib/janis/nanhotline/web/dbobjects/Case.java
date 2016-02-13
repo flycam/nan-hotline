@@ -29,6 +29,20 @@ public class Case {
         return null;
     }
 
+    public static Integer getMergedId(int id) throws SQLException {
+        PreparedStatement prep = DatabaseConnection.getInstance().prepare(
+                "SELECT \"case\" FROM merge_actions WHERE old_case=?"
+        );
+        prep.setInt(1, id);
+        ResultSet resSet = prep.executeQuery();
+        if (resSet.next()) {
+            Integer c = resSet.getInt("case");
+            resSet.close();
+            return c;
+        }
+        return null;
+    }
+
     public static LinkedList<Case> getUnassignedCases() throws SQLException {
         LinkedList<Case> res = new LinkedList<Case>();
         PreparedStatement prep = DatabaseConnection
