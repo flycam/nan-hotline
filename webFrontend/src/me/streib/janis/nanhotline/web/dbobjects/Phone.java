@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import me.streib.janis.nanhotline.web.DatabaseConnection;
 
 public class Phone {
-    private int id;
+    private int id, supporter;
     private String sipUri;
 
     public static Phone getById(int id) throws SQLException {
@@ -25,6 +25,7 @@ public class Phone {
     public Phone(ResultSet res) throws SQLException {
         id = res.getInt("id");
         sipUri = res.getString("sip_uri");
+        supporter = res.getInt("supporter");
     }
 
     public Phone(String sipUri, Supporter supporter) throws SQLException {
@@ -54,5 +55,9 @@ public class Phone {
 
     public String getSipUri() {
         return sipUri;
+    }
+
+    public int getSupporter() {
+        return supporter;
     }
 }

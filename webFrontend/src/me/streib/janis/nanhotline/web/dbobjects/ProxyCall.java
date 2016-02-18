@@ -24,6 +24,8 @@ public class ProxyCall extends Action {
     public Outputable output(Map<String, Object> vars, Supporter user)
             throws SQLException {
         vars.put("supp_sip", supporterPhone.getSipUri());
+        vars.put("supp_name", Supporter
+                .getSupporterById(supporterPhone.getId()).getName());
         vars.put("targ_sip", targetSipUri);
         vars.put("accpeted", accepted);
         vars.put("time", Page.DE_FROMAT_DATE.format(getTime()));
